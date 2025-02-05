@@ -12,7 +12,7 @@ A **full-stack MERN + SQL** project that automates exam scheduling and invigilat
 ✅ **API Integration** – RESTful API to handle scheduling and data retrieval.  
 ✅ **Responsive UI** – Built with **React.js + TailwindCSS** for a seamless experience.  
 ✅ **Database Management** – **SQL (PostgreSQL/MySQL) + ORM (Sequelize/Prisma)**.  
-✅ **Deployment** – Hosted on **Vercel/Railway with Docker & Nginx Reverse Proxy**.  
+✅ **Deployment** – Hosted on **Vercel/Railway with Docker & Nginx Reverse Proxy**   
 
 ## 🛠 Tech Stack  
 - **Frontend**: React.js, TailwindCSS, Recoil/Context API  
