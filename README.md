@@ -52,3 +52,4 @@ A **full-stack MERN + SQL** project that automates exam scheduling and invigilat
 ## 📢 Contributing  
 We welcome contributions! Open an issue or create a pull request.  
 
+![Funny GIF](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3B5MmQxZXUxM21rZ3RnY3pndmNwOXM4dzl2d2hicjdlZm8xcGJvdiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/MKg9s6l6CwfF4oTwm1/giphy.gif)
