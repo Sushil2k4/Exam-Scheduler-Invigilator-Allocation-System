@@ -119,7 +119,19 @@ INSERT INTO Faculty (faculty_id, name, email, phone_number, department, availabi
 ('RA2311003010FA009', 'Dr. Senthil Kumar', 'sentK@srmist.edu.in', '9876543218', 'Civil Engineering', TRUE),
 ('RA2311003010FA010', 'Dr. Geeta G ', 'gg@srmist.edu.in', '9876543219', 'Chemical Engineering', TRUE);
 
+INSERT INTO room VALUES
+('1','101','Tech Park','Class',60),
+('2','102','Tech Park','Class',60),
+('3','103','Tech Park','Class',60),
+('4','105','Tech Park','Class',60),
+('5','201','Tech Park','Class',60),
+('6','202','Tech Park','Class',60),
+('7','203','Tech Park','Class',60),
+('8','204','Tech Park','Class',60),
+('9','205','Tech Park','Class',60),
+('10','206','Tech Park','Class',60);
+
 -- Sample query to test the Student table
 SELECT * FROM Student;
 SELECT * FROM Faculty;
-
+SELECT * FROM room;
