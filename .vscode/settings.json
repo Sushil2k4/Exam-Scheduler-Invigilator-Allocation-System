@@ -1,0 +1,15 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "ExamScheduler",
+            "database": "InvigilatorAllocationSystem",
+            "username": "postgres",
+            "password": "Sushil@2004",
+            "connectionTimeout": 30
+        }
+    ]
+}
