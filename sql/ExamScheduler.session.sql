@@ -131,7 +131,20 @@ INSERT INTO room VALUES
 ('9','205','Tech Park','Class',60),
 ('10','206','Tech Park','Class',60);
 
+INSERT INTO exam (exam_id, subject, date, start_time, end_time, semester, department, room_id) VALUES
+('21CSC204J','Data Structures and Algorithms','2021-12-01','09:00:00','12:00:00',2,'Computer Science','1'),
+('21CSC205J','Operating Systems','2021-12-02','09:00:00','12:00:00',2,'Computer Science','2'),
+('21CSC206J','Computer Networks','2021-12-03','09:00:00','12:00:00',2,'Computer Science','3'),
+('21CSC207J','Database Management Systems','2021-12-04','09:00:00','12:00:00',2,'Computer Science','4'),
+('21CSC208J','Software Engineering','2021-12-05','09:00:00','12:00:00',2,'Computer Science','5'),
+('21ELE204J','Electrical Machines','2021-12-06','09:00:00','12:00:00',2,'Electrical Engineering','6'),
+('21ELE205J','Power Systems','2021-12-07','09:00:00','12:00:00',2,'Electrical Engineering','7'),
+('21ELE206J','Control Systems','2021-12-08','09:00:00','12:00:00',2,'Electrical Engineering','8'),
+('21ELE207J','Digital Electronics','2021-12-09','09:00:00','12:00:00',2,'Electrical Engineering','9'),
+('21ELE208J','Microprocessors','2021-12-10','09:00:00','12:00:00',2,'Electrical Engineering','10');
+
 -- Sample query to test the Student table
 SELECT * FROM Student;
 SELECT * FROM Faculty;
 SELECT * FROM room;
+SELECT * FROM exam;
