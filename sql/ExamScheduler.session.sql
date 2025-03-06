@@ -97,7 +97,7 @@ CREATE TABLE Takes (
 INSERT INTO Student (student_id, first_name, last_name, email, phone_number, department, academic_year, semester) VALUES
 ('RA2311003010369', 'Divyansh', 'Singh','dks@gmail.com', '1234567890', 'Computer Science', 1, 1),
 ('RA2311003010392', 'Spandan', 'Choubey', 'spdcb@gmail.com', '1234567891', 'Electrical Engineering', 2, 3),
-('RA2311003010393', 'Sushil', 'Mishra', 'skm@gmail.com', '1234567892', 'Computer Engineering', 3, 5),
+('RA2311003010393', 'Sushil', 'Mishra', 'skm@gmail.com', '1234567892', 'Computer Engineering', 2, 4),
 ('RA2311003010406', 'Abhik', 'Raj', 'abkrj@gmail.com', '1234567893', 'Civil Engineering', 4, 7),
 ('RA2311003010426', 'Arnav', 'Prateek', 'ap@gmail.com', '1234567894', 'Chemical Engineering', 5, 9),
 ('RA2311003010427', 'Selvam', 'Furniturewala', 'slvfwl@gmail.com', '1234567895', 'Computer Science', 1, 2),
