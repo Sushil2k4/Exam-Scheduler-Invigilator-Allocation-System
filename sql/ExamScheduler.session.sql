@@ -143,7 +143,7 @@ INSERT INTO exam (exam_id, subject, date, start_time, end_time, semester, depart
 ('21ELE207J','Digital Electronics','2021-12-09','09:00:00','12:00:00',2,'Electrical Engineering','9'),
 ('21ELE208J','Microprocessors','2021-12-10','09:00:00','12:00:00',2,'Electrical Engineering','10');
 
-INSERT INTO TimeTable (timetable_id, student_id, exam_id, room_id) VALUES
+INSERT INTO timeTable (timetable_id, student_id, exam_id, room_id) VALUES
 ('1','RA2311003010369','21CSC204J','1'),
 ('2','RA2311003010369','21CSC205J','2'),
 ('3','RA2311003010369','21CSC206J','3'),
@@ -155,7 +155,7 @@ INSERT INTO TimeTable (timetable_id, student_id, exam_id, room_id) VALUES
 ('9','RA2311003010392','21ELE207J','9'),
 ('10','RA2311003010392','21ELE208J','10');
 
-INSERT INTO Allocation VALUES
+INSERT INTO allocation VALUES
 ('1','21CSC204J','1','RA2311003010FA001',2),
 ('2','21CSC205J','2','RA2311003010FA002',2),
 ('3','21CSC206J','3','RA2311003010FA003',2),
@@ -172,3 +172,5 @@ SELECT * FROM Student;
 SELECT * FROM Faculty;
 SELECT * FROM room;
 SELECT * FROM exam;
+SELECT * FROM timetable;
+SELECT * FROM allocation;
