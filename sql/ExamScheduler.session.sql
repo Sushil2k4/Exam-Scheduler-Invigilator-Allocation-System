@@ -117,7 +117,7 @@ INSERT INTO Faculty (faculty_id, name, email, phone_number, department, availabi
 ('RA2311003010FA007', 'Dr. Deepa R', 'deepuR@srmist.edu.in', '9876543216', 'Electrical Engineering', TRUE),
 ('RA2311003010FA008', 'Dr. Dhanavati G', 'dhanuG@srmist.edu.in', '9876543217', 'Mechanical Engineering', TRUE),
 ('RA2311003010FA009', 'Dr. Senthil Kumar', 'sentK@srmist.edu.in', '9876543218', 'Civil Engineering', TRUE),
-('RA2311003010FA010', 'Dr. Geeta G ', 'gg@srmist.edu.in', '9876543219', 'Chemical Engineering', TRUE);
+('RA2311003010FA010', 'Dr. Geetha G ', 'gg@srmist.edu.in', '9876543219', 'Chemical Engineering', TRUE);
 
 INSERT INTO room VALUES
 ('1','101','Tech Park','Class',60),
