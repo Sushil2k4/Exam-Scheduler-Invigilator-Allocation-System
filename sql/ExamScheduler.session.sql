@@ -1,3 +1,13 @@
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS Takes;
+DROP TABLE IF EXISTS Invigilation;
+DROP TABLE IF EXISTS Allocation;
+DROP TABLE IF EXISTS TimeTable;
+DROP TABLE IF EXISTS Exam;
+DROP TABLE IF EXISTS Room;
+DROP TABLE IF EXISTS Faculty;
+DROP TABLE IF EXISTS Student;
+
 -- Student Table
 CREATE TABLE Student (
     student_id VARCHAR(50) PRIMARY KEY,
@@ -38,38 +48,50 @@ CREATE TABLE Exam (
     end_time TIME NOT NULL,
     semester INT CHECK (semester >= 1 AND semester <= 10),
     department VARCHAR(100) NOT NULL,
-    room_id VARCHAR(50) REFERENCES Room(room_id) ON DELETE SET NULL
+    room_id VARCHAR(50),
+    FOREIGN KEY (room_id) REFERENCES Room(room_id) ON DELETE SET NULL
 );
 
 -- Time Table
 CREATE TABLE TimeTable (
     timetable_id VARCHAR(50) PRIMARY KEY,
-    student_id VARCHAR(50) REFERENCES Student(student_id) ON DELETE CASCADE,
-    exam_id VARCHAR(50) REFERENCES Exam(exam_id) ON DELETE CASCADE,
-    room_id VARCHAR(50) REFERENCES Room(room_id) ON DELETE SET NULL
+    student_id VARCHAR(50),
+    exam_id VARCHAR(50),
+    room_id VARCHAR(50),
+    FOREIGN KEY (student_id) REFERENCES Student(student_id) ON DELETE CASCADE,
+    FOREIGN KEY (exam_id) REFERENCES Exam(exam_id) ON DELETE CASCADE,
+    FOREIGN KEY (room_id) REFERENCES Room(room_id) ON DELETE SET NULL
 );
 
 -- Allocation Table
 CREATE TABLE Allocation (
     allocation_id VARCHAR(50) PRIMARY KEY,
-    exam_id VARCHAR(50) REFERENCES Exam(exam_id) ON DELETE CASCADE,
-    room_id VARCHAR(50) REFERENCES Room(room_id) ON DELETE CASCADE,
-    faculty_id VARCHAR(50) REFERENCES Faculty(faculty_id) ON DELETE CASCADE,
-    semester INT CHECK (semester >= 1 AND semester <= 10)
+    exam_id VARCHAR(50),
+    room_id VARCHAR(50),
+    faculty_id VARCHAR(50),
+    semester INT CHECK (semester >= 1 AND semester <= 10),
+    FOREIGN KEY (exam_id) REFERENCES Exam(exam_id) ON DELETE CASCADE,
+    FOREIGN KEY (room_id) REFERENCES Room(room_id) ON DELETE CASCADE,
+    FOREIGN KEY (faculty_id) REFERENCES Faculty(faculty_id) ON DELETE CASCADE
 );
 
 -- Invigilation Table (Many-to-Many between Faculty and Exam)
 CREATE TABLE Invigilation (
-    faculty_id VARCHAR(50) REFERENCES Faculty(faculty_id) ON DELETE CASCADE,
-    exam_id VARCHAR(50) REFERENCES Exam(exam_id) ON DELETE CASCADE,
-    PRIMARY KEY (faculty_id, exam_id)
+    faculty_id VARCHAR(50),
+    exam_id VARCHAR(50),
+    PRIMARY KEY (faculty_id, exam_id),
+    FOREIGN KEY (faculty_id) REFERENCES Faculty(faculty_id) ON DELETE CASCADE,
+    FOREIGN KEY (exam_id) REFERENCES Exam(exam_id) ON DELETE CASCADE
 );
 
 -- Takes Table (Many-to-Many between Student and Exam)
 CREATE TABLE Takes (
-    student_id VARCHAR(50) REFERENCES Student(student_id) ON DELETE CASCADE,
-    exam_id VARCHAR(50) REFERENCES Exam(exam_id) ON DELETE CASCADE,
-    PRIMARY KEY (student_id, exam_id)
+    student_id VARCHAR(50),
+    exam_id VARCHAR(50),
+    PRIMARY KEY (student_id, exam_id),
+    FOREIGN KEY (student_id) REFERENCES Student(student_id) ON DELETE CASCADE,
+    FOREIGN KEY (exam_id) REFERENCES Exam(exam_id) ON DELETE CASCADE
 );
 
+-- Sample query to test the Student table
 SELECT * FROM Student;
