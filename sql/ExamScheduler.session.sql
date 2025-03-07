@@ -203,3 +203,19 @@ SELECT * FROM invigilation;
 SELECT * FROM STUDENT WHERE department = 'Computer Science';
 
 SELECT student_id , first_name FROM student WHERE semester IN(SELECT semester FROM exam WHERE subject = 'Data Structures and Algorithms');
+
+ALTER TABLE student ADD dob DATE;
+
+ALTER TABLE Student ADD CONSTRAINT chk_dob CHECK (dob < '2005-01-01');
+
+UPDATE Student
+SET dob = '1999-01-01'
+WHERE student_id = 'RA2311003010369';
+
+UPDATE Student
+SET dob = '2001-02-02'
+WHERE student_id = 'RA2311003010392';
+
+UPDATE Student
+SET dob = '2002-03-03'
+WHERE student_id = 'RA2311003010393';
