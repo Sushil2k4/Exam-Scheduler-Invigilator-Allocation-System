@@ -99,7 +99,7 @@ INSERT INTO Student (student_id, first_name, last_name, email, phone_number, dep
 ('RA2311003010392', 'Spandan', 'Choubey', 'spdcb@gmail.com', '1234567891', 'Electrical Engineering', 2, 3),
 ('RA2311003010393', 'Sushil', 'Mishra', 'skm@gmail.com', '1234567892', 'Computer Engineering', 2, 4),
 ('RA2311003010406', 'Abhik', 'Raj', 'abkrj@gmail.com', '1234567893', 'Civil Engineering', 4, 7),
-('RA2311003010426', 'Arnav', 'Prateek', 'ap@gmail.com', '1234567894', 'Chemical Engineering', 5, 9),
+('RA2311003010426', 'Arnav', 'Prateek', 'ap@gmail.com', '1234567894', 'Biotech Engineering', 5, 9),
 ('RA2311003010427', 'Selvam', 'Furniturewala', 'slvfwl@gmail.com', '1234567895', 'Computer Science', 1, 2),
 ('RA2311003010436', 'Titas', 'Banerjee', 'ttsbnrj@gmail.com', '1234567896', 'Electrical Engineering', 2, 4),
 ('RA2311003010438', 'Nadeem', 'Shah', 'ndms@gmail.com', '1234567897', 'Mechanical Engineering', 3, 6),
@@ -199,3 +199,7 @@ SELECT * FROM exam;
 SELECT * FROM timetable;
 SELECT * FROM allocation;
 SELECT * FROM invigilation;
+
+SELECT * FROM STUDENT WHERE department = 'Computer Science';
+
+SELECT student_id , first_name FROM student WHERE semester IN(SELECT semester FROM exam WHERE subject = 'Data Structures and Algorithms');
