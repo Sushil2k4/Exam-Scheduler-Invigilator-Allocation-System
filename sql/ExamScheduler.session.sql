@@ -219,3 +219,7 @@ WHERE student_id = 'RA2311003010392';
 UPDATE Student
 SET dob = '2002-03-03'
 WHERE student_id = 'RA2311003010393';
+
+SELECT student_id, first_name, last_name, dob
+FROM Student
+WHERE dob BETWEEN '1991-01-01' AND '2004-12-31';
