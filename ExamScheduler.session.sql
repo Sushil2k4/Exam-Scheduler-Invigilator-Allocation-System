@@ -99,7 +99,7 @@ INSERT INTO Student (student_id, first_name, last_name, email, phone_number, dep
 VALUES
 ('RA2311003010393', 'Sushil', 'Mishra', 'sk7493@srmist.edu.in', '9836363274', 'CSE', 3, 6),
 ('RA2311003010426', 'Arnav', 'Prateek', 'ap8051@srmist.edu.in', '8618276053', 'CSE', 3, 6),
-('RA2311003010369', 'DivyanshDaddy', 'Singh', 'ds2692@srmist.edu.in', '8887991541', 'CSE', 3, 6),
+('RA2311003010369', 'Divyansh', 'Singh', 'ds2692@srmist.edu.in', '8887991541', 'CSE', 3, 6),
 ('RA2311003010492', 'Ananya', 'Singh', 'as0492@srmist.edu.in', '9876543213', 'CSE', 3, 6),
 ('RA2311003010525', 'Arjun', 'Patel', 'ap0525@srmist.edu.in', '9876543214', 'CSE', 3, 6),
 ('RA2311003010558', 'Bhavya', 'Jain', 'bj0558@srmist.edu.in', '9876543215', 'CSE', 3, 6),
