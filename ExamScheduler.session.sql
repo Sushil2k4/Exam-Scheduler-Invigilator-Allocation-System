@@ -238,7 +238,7 @@ VALUES
 ('RA2311003014914', 'Zoya', 'Mishra', 'zm4914@srmist.edu.in', '9876543347', 'CSE', 2, 4),
 
 
-('RA2311003014947', 'Aarav', 'Gangotree', 'as4947@srmist.edu.in', '9876543348', 'CSE', 2, 4),
+('RA2311003014947', 'Aarav', 'Gangotree', 'as4947@srmist.edu.in', '9876543348', 'CSE', 1, 2),
 ('RA2311003014980', 'Archit', 'Prateek', 'av4980@srmist.edu.in', '9876543349', 'CSE', 2, 4),
 ('RA2311003015013', 'Aditya', 'Kumar', 'ak5013@srmist.edu.in', '9876543350', 'CSE', 2, 4),
 ('RA2311003015046', 'Ananya', 'Singh', 'as5046@srmist.edu.in', '9876543351', 'CSE', 2, 4),
@@ -2570,3 +2570,6 @@ SELECT * FROM exam;
 SELECT * FROM student;
 SELECT * FROM faculty;
 SELECT * FROM room;
+
+
+
