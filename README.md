@@ -1,6 +1,6 @@
 # Exam Scheduler and Invigilator Allocation System
 
-A **full-stack MERN + SQL** project that automates exam scheduling and invigilator allocation, ensuring efficient resource management in educational institutions.  
+A **full-stack PERN + SQL** project that automates exam scheduling and invigilator allocation, ensuring efficient resource management in educational institutions.  
 
 ## 📌 Features  
 ✅ **User Authentication** – Secure login system for admins and faculty.  
