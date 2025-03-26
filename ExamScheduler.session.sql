@@ -2571,7 +2571,6 @@ SELECT * FROM student;
 SELECT * FROM faculty;
 SELECT * FROM room;
 
-
-
+--4 tables populated till now 
 
 
