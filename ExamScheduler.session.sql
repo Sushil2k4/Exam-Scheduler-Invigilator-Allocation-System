@@ -2571,6 +2571,113 @@ SELECT * FROM student;
 SELECT * FROM faculty;
 SELECT * FROM room;
 
+UPDATE Student
+SET department = 'Computing Technologies';
+
+SELECT * FROM Student WHERE department = 'Computing Technologies';
+SELECT * FROM Exam WHERE department = 'Computing Technologies';
+
+SELECT DISTINCT department FROM Exam;
+
+UPDATE Exam
+SET department = 'Computing Technologies'
+WHERE department IS NULL OR department = 'CSE';
+
+SELECT DISTINCT department FROM Student;
+SELECT DISTINCT department FROM Exam;
+
+SELECT * FROM Exam WHERE department = 'Computing Technologies';
+
+UPDATE Exam
+SET department = CASE
+    WHEN subject_code = '21CSC206T' THEN 'Computing Technologies'
+    WHEN subject_code = '21CSC204J' THEN 'Computing Technologies'
+    WHEN subject_code = '21MAB204T' THEN 'Computing Technologies'
+    WHEN subject_code = '21PDH201T' THEN 'Computing Technologies'
+    ELSE NULL -- Or the original department if known
+END;
+
+SELECT 
+    e.exam_id,
+    e.subject AS exam_subject,
+    e.date AS exam_date,
+    e.start_time,
+    e.end_time,
+    e.department AS exam_department,
+    s.student_id,
+    s.first_name || ' ' || s.last_name AS student_name
+FROM 
+    Student s
+JOIN 
+    Exam e ON s.department = e.department
+WHERE 
+    s.department = 'Computing Technologies'
+ORDER BY 
+    e.date, e.start_time;
+
+SELECT 
+    e.exam_id,
+    e.subject AS exam_subject,
+    e.date AS exam_date,
+    e.start_time,
+    e.end_time,
+    e.department AS exam_department,
+    s.student_id,
+    s.first_name || ' ' || s.last_name AS student_name
+FROM 
+    Student s
+JOIN 
+    Exam e ON s.department = e.department
+WHERE 
+    s.department = 'Computing Technologies'
+ORDER BY 
+    e.date, e.start_time;
+
+SELECT *
+FROM TimeTable tt
+JOIN Student s ON tt.student_id = s.student_id
+JOIN Exam e ON tt.exam_id = e.exam_id
+WHERE s.student_id = 'RA2311003010393' AND s.department = 'Computing Technologies';
+
+SELECT * FROM Student WHERE student_id = 'RA2311003010393' AND department = 'Computing Technologies';
+
+SELECT * FROM Exam WHERE department = 'Computing Technologies';
+
+INSERT INTO TimeTable (timetable_id, student_id, exam_id, room_id)
+SELECT 
+    CONCAT(s.student_id, '_', e.exam_id) AS timetable_id, -- Generate a unique timetable_id
+    s.student_id,
+    e.exam_id,
+    e.room_id -- Assuming `room_id` is available in the `Exam` table
+FROM 
+    Student s
+JOIN 
+    Exam e ON s.department = e.department
+WHERE 
+    s.department = 'Computing Technologies';
+
+select * from TimeTable;
+
+SELECT * FROM TimeTable WHERE student_id = 'RA2311003010393';
 
 
-
+SELECT 
+    tt.timetable_id,
+    tt.student_id,
+    s.first_name || ' ' || s.last_name AS student_name,
+    e.subject AS exam_subject,
+    e.date AS exam_date,
+    e.start_time,
+    e.end_time,
+    e.department AS exam_department
+FROM 
+    TimeTable tt
+JOIN 
+    Student s ON tt.student_id = s.student_id
+JOIN 
+    Exam e ON tt.exam_id = e.exam_id
+WHERE 
+    s.student_id = 'RA2311003010426' 
+    AND s.department = 'Computing Technologies'
+ORDER BY 
+    e.date, e.start_time;
