@@ -77,7 +77,7 @@ CREATE TABLE Allocation (
 );
 
 -- Invigilation Table (Many-to-Many between Faculty and Exam)
-CREATE TABLE Invigilation (
+/*CREATE TABLE Invigilation (
     faculty_id INT NOT NULL,
     exam_id VARCHAR(50),
     PRIMARY KEY (faculty_id, exam_id),
@@ -92,7 +92,7 @@ CREATE TABLE Takes (
     PRIMARY KEY (student_id, exam_id),
     FOREIGN KEY (student_id) REFERENCES Student(student_id) ON DELETE CASCADE,
     FOREIGN KEY (exam_id) REFERENCES Exam(exam_id) ON DELETE CASCADE
-);
+); */
 
 -- Inserting 1200 students into the Student table
 INSERT INTO Student (student_id, first_name, last_name, email, phone_number, department, academic_year, semester)
@@ -2566,10 +2566,6 @@ INSERT INTO Exam (exam_id, subject, date, start_time, end_time, semester, depart
 VALUES
 ('20250603_10_3_1', '21CSC201J - DATA STRUCTURES AND ALGORITHMS', '2025-06-03', '10:00:00', '13:00:00', 3, NULL, '21CSC201J', 'DATA STRUCTURES AND ALGORITHMS', 180, FALSE);
 
-SELECT * FROM exam;
-SELECT * FROM student;
-SELECT * FROM faculty;
-SELECT * FROM room;
 
 UPDATE Student
 SET department = 'Computing Technologies';
@@ -2681,3 +2677,135 @@ WHERE
     AND s.department = 'Computing Technologies'
 ORDER BY 
     e.date, e.start_time;
+
+CREATE TABLE ExamRoomAllocation (
+    allocation_id SERIAL PRIMARY KEY,
+    exam_id VARCHAR(50) NOT NULL,
+    room_id VARCHAR(50) NOT NULL,
+    student_count INT CHECK (student_count <= 60),
+    FOREIGN KEY (exam_id) REFERENCES Exam(exam_id) ON DELETE CASCADE,
+    FOREIGN KEY (room_id) REFERENCES Room(room_id) ON DELETE CASCADE
+);
+
+DO $$
+DECLARE
+    v_exam_id VARCHAR(50) := '20250517_10_4_15';  -- Use a distinct variable name
+    total_students INT;
+    room_capacity INT := 60;
+    room_cursor CURSOR FOR
+        SELECT room_id FROM Room;
+    room_count INT := 0;
+    students_remaining INT;
+    batch_size INT := 60;
+    current_room VARCHAR(50);
+BEGIN
+    -- Count total students taking the exam
+    SELECT COUNT(*) INTO total_students
+    FROM Timetable t
+    WHERE t.exam_id = v_exam_id;
+
+
+    -- Initialize remaining students
+    students_remaining := total_students;
+
+    -- Open cursor to iterate over rooms
+    OPEN room_cursor;
+
+    -- Allocate students in batches of 60
+    LOOP
+        FETCH room_cursor INTO current_room;
+        EXIT WHEN NOT FOUND;
+
+        -- Allocate the batch of students to the current room
+        IF students_remaining > batch_size THEN
+            INSERT INTO ExamRoomAllocation (exam_id, room_id, student_count)
+            VALUES (v_exam_id, current_room, batch_size);  -- Use the renamed variable
+
+            students_remaining := students_remaining - batch_size;
+        ELSE
+            -- Allocate remaining students
+            INSERT INTO ExamRoomAllocation (exam_id, room_id, student_count)
+            VALUES (v_exam_id, current_room, students_remaining);  -- Use the renamed variable
+
+            students_remaining := 0;
+        END IF;
+
+        -- Exit the loop when all students are allocated
+        EXIT WHEN students_remaining <= 0;
+    END LOOP;
+
+    -- Close cursor
+    CLOSE room_cursor;
+
+    RAISE NOTICE 'Exam % allocated to rooms with % students', v_exam_id, total_students;
+END $$;
+
+SELECT
+    exam_id,
+    room_id,
+    student_count
+FROM
+    ExamRoomAllocation
+WHERE
+    exam_id = '20250517_10_4_15';  -- Replace with your exam ID
+
+DO $$
+DECLARE
+    room_cursor CURSOR FOR
+        SELECT room_id FROM Room LIMIT 20;  -- Select 20 rooms
+    faculty_cursor CURSOR FOR
+        SELECT faculty_id::INTEGER FROM Faculty  -- Cast to INTEGER
+        ORDER BY RANDOM() LIMIT 20;  -- Select 20 random faculty
+    current_room VARCHAR(50);
+    current_faculty INTEGER;
+    new_allocation_id VARCHAR(50);
+BEGIN
+    -- Open both cursors
+    OPEN room_cursor;
+    OPEN faculty_cursor;
+
+    -- Iterate over rooms and randomly assign faculty
+    LOOP
+        FETCH room_cursor INTO current_room;
+        FETCH faculty_cursor INTO current_faculty;
+
+        EXIT WHEN NOT FOUND;
+
+        -- Generate unique allocation ID
+        new_allocation_id := CONCAT('ALLOC-', current_room, '-', current_faculty);
+
+        -- Insert with manual allocation_id
+        INSERT INTO Allocation (allocation_id, exam_id, room_id, faculty_id)
+        VALUES (new_allocation_id, '20250517_10_4_15', current_room, current_faculty);
+
+    END LOOP;
+
+    -- Close cursors
+    CLOSE room_cursor;
+    CLOSE faculty_cursor;
+
+    RAISE NOTICE 'Random faculty allocated to rooms';
+END $$;
+
+
+
+SELECT
+    a.exam_id,
+    a.room_id,
+    f.name AS faculty_name,
+    r.room_no AS room_number
+FROM
+    Allocation a
+JOIN
+    Faculty f ON a.faculty_id = f.faculty_id
+JOIN
+    Room r ON a.room_id = r.room_id
+WHERE
+    a.exam_id = '20250517_10_4_15';  -- Replace with your exam_id
+
+SELECT * FROM exam;
+SELECT * FROM student;
+SELECT * FROM faculty;
+SELECT * FROM room;
+SELECT * FROM timetable;
+SELECT * FROM allocation;
