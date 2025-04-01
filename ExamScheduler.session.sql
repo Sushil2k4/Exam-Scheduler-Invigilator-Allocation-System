@@ -2803,9 +2803,13 @@ JOIN
 WHERE
     a.exam_id = '20250517_10_4_15';  -- Replace with your exam_id
 
+COMMIT;
+
 SELECT * FROM exam;
 SELECT * FROM student;
 SELECT * FROM faculty;
 SELECT * FROM room;
 SELECT * FROM timetable;
 SELECT * FROM allocation;
+
+
