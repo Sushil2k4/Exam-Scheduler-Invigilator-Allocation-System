@@ -2805,6 +2805,11 @@ WHERE
 
 COMMIT;
 
+UPDATE Allocation a
+SET semester = (SELECT e.semester FROM Exam e WHERE e.exam_id = a.exam_id)
+WHERE a.exam_id = '20250517_10_4_15';
+
+
 SELECT * FROM exam;
 SELECT * FROM student;
 SELECT * FROM faculty;
