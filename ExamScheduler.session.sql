@@ -2810,6 +2810,49 @@ SET semester = (SELECT e.semester FROM Exam e WHERE e.exam_id = a.exam_id)
 WHERE a.exam_id = '20250517_10_4_15';
 
 
+
+
+-- Create a function that the trigger will call
+CREATE OR REPLACE FUNCTION allocate_exam_rooms()
+RETURNS TRIGGER AS $$
+DECLARE
+    room_cursor CURSOR FOR
+        SELECT room_id FROM Room LIMIT 20;  -- Select up to 20 rooms
+    faculty_cursor CURSOR FOR
+        SELECT faculty_id FROM Faculty ORDER BY RANDOM() LIMIT 20; -- Select 20 random faculty
+    current_room VARCHAR(50);
+    current_faculty INTEGER;
+    new_allocation_id VARCHAR(50);
+BEGIN
+    -- Open both cursors
+    OPEN room_cursor;
+    OPEN faculty_cursor;
+
+    -- Iterate through rooms and randomly assign faculty
+    LOOP
+        FETCH room_cursor INTO current_room;
+        FETCH faculty_cursor INTO current_faculty;
+
+        EXIT WHEN NOT FOUND; -- Stop if no more rooms or faculty
+
+        -- Generate unique allocation ID
+        new_allocation_id := CONCAT('ALLOC-', current_room, '-', current_faculty);
+
+        -- Insert into Allocation table
+        INSERT INTO Allocation (allocation_id, exam_id, room_id, faculty_id, semester)
+        VALUES (new_allocation_id, NEW.exam_id, current_room, current_faculty, NEW.semester);
+
+    END LOOP;
+
+    -- Close cursors
+    CLOSE room_cursor;
+    CLOSE faculty_cursor;
+
+    RAISE NOTICE 'Rooms and faculty allocated for exam %', NEW.exam_id;
+    RETURN NEW;
+END $$ LANGUAGE plpgsql;
+
+
 SELECT * FROM exam;
 SELECT * FROM student;
 SELECT * FROM faculty;
@@ -2817,4 +2860,22 @@ SELECT * FROM room;
 SELECT * FROM timetable;
 SELECT * FROM allocation;
 
-
+SELECT 
+    s.student_id,
+    s.first_name || ' ' || s.last_name AS student_name,
+    e.exam_id,
+    e.subject AS exam_subject,
+    e.date AS exam_date,
+    e.start_time,
+    e.end_time,
+    e.department AS exam_department
+FROM 
+    TimeTable tt
+JOIN 
+    Student s ON tt.student_id = s.student_id
+JOIN 
+    Exam e ON tt.exam_id = e.exam_id
+WHERE 
+    e.exam_id = '20250516_14_4_12'  
+ORDER BY 
+    s.student_id;
