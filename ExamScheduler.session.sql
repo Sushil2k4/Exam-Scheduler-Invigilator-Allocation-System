@@ -2749,43 +2749,7 @@ FROM
 WHERE
     exam_id = '20250517_10_4_15';  -- Replace with your exam ID
 
-DO $$
-DECLARE
-    room_cursor CURSOR FOR
-        SELECT room_id FROM Room LIMIT 20;  -- Select 20 rooms
-    faculty_cursor CURSOR FOR
-        SELECT faculty_id::INTEGER FROM Faculty  -- Cast to INTEGER
-        ORDER BY RANDOM() LIMIT 20;  -- Select 20 random faculty
-    current_room VARCHAR(50);
-    current_faculty INTEGER;
-    new_allocation_id VARCHAR(50);
-BEGIN
-    -- Open both cursors
-    OPEN room_cursor;
-    OPEN faculty_cursor;
 
-    -- Iterate over rooms and randomly assign faculty
-    LOOP
-        FETCH room_cursor INTO current_room;
-        FETCH faculty_cursor INTO current_faculty;
-
-        EXIT WHEN NOT FOUND;
-
-        -- Generate unique allocation ID
-        new_allocation_id := CONCAT('ALLOC-', current_room, '-', current_faculty);
-
-        -- Insert with manual allocation_id
-        INSERT INTO Allocation (allocation_id, exam_id, room_id, faculty_id)
-        VALUES (new_allocation_id, '20250517_10_4_15', current_room, current_faculty);
-
-    END LOOP;
-
-    -- Close cursors
-    CLOSE room_cursor;
-    CLOSE faculty_cursor;
-
-    RAISE NOTICE 'Random faculty allocated to rooms';
-END $$;
 
 
 
