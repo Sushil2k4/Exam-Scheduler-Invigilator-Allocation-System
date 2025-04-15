@@ -53,6 +53,8 @@ CREATE TABLE Exam (
     FOREIGN KEY (room_id) REFERENCES Room(room_id) ON DELETE SET NULL
 );
 
+--updated tables
+
 -- Time Table
 CREATE TABLE TimeTable (
     timetable_id VARCHAR(50) PRIMARY KEY,
@@ -77,7 +79,7 @@ CREATE TABLE Allocation (
 );
 
 -- Invigilation Table (Many-to-Many between Faculty and Exam)
-/*CREATE TABLE Invigilation (
+CREATE TABLE Invigilation (
     faculty_id INT NOT NULL,
     exam_id VARCHAR(50),
     PRIMARY KEY (faculty_id, exam_id),
@@ -92,7 +94,7 @@ CREATE TABLE Takes (
     PRIMARY KEY (student_id, exam_id),
     FOREIGN KEY (student_id) REFERENCES Student(student_id) ON DELETE CASCADE,
     FOREIGN KEY (exam_id) REFERENCES Exam(exam_id) ON DELETE CASCADE
-); */
+); 
 
 -- Inserting 1200 students into the Student table
 INSERT INTO Student (student_id, first_name, last_name, email, phone_number, department, academic_year, semester)
@@ -2775,8 +2777,6 @@ WHERE a.exam_id = '20250517_10_4_15';
 
 
 
-
-
 SELECT * FROM exam;
 SELECT * FROM student;
 SELECT * FROM faculty;
@@ -2805,3 +2805,4 @@ ORDER BY
     s.student_id;
 
 --updated
+
