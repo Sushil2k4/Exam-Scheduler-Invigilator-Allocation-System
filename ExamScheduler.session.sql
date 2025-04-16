@@ -53,8 +53,6 @@ CREATE TABLE Exam (
     FOREIGN KEY (room_id) REFERENCES Room(room_id) ON DELETE SET NULL
 );
 
---updated tables
-
 -- Time Table
 CREATE TABLE TimeTable (
     timetable_id VARCHAR(50) PRIMARY KEY,
