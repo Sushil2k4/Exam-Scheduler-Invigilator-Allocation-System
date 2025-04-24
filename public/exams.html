@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam Schedule</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Exam Schedule</h1>
+    <div class="filters">
+      <select id="departmentFilter">
+        <option value="">All Departments</option>
+        <option value="Computer Science">Computer Science</option>
+        <option value="Electrical">Electrical</option>
+        <option value="Mechanical">Mechanical</option>
+      </select>
+      <input type="date" id="dateFilter">
+      <button id="applyFilters">Apply</button>
+      <button id="addExamBtn">Add New Exam</button>
+    </div>
+    <div class="card">
+      <table id="examTable">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Room</th>
+            <th>Department</th>
+            <th>Semester</th>
+          </tr>
+        </thead>
+        <tbody class="loading">
+          <tr><td colspan="6">Loading exams...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script src="/exams.js"></script>
+</body>
+</html>

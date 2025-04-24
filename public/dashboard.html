@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | ESIAS</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="dashboard">
+    <header class="dashboard-header">
+      <div class="logo">ESIAS</div>
+      <h1>Exam Scheduler and Invigilator Allocation System</h1>
+      <button id="logoutBtn" class="logout-btn">Logout</button>
+    </header>
+    
+    <nav class="dashboard-nav">
+      <a href="/students.html" class="nav-link">Students</a>
+      <a href="/exams.html" class="nav-link">Exams</a>
+      <a href="/allocations.html" class="nav-link">Allocations</a>
+    </nav>
+    
+    <main class="dashboard-content">
+      <!-- Content will be loaded here based on navigation -->
+      <div class="welcome-message">
+        <h2>Welcome, <span id="userName"></span>!</h2>
+        <p>Select an option from the navigation menu to begin.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check authentication
+      if (!localStorage.getItem('authToken')) {
+        window.location.href = '/';
+      }
+      
+      // Display user info
+      const token = localStorage.getItem('authToken');
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      document.getElementById('userName').textContent = payload.id;
+      
+      // Logout button
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        window.location.href = '/';
+      });
+    });
+  </script>
+</body>
+</html>

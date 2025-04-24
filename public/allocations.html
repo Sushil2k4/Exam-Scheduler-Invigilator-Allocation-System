@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam Allocations</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Invigilator Allocations</h1>
+    <div class="filters">
+      <select id="facultyFilter">
+        <option value="">All Faculty</option>
+      </select>
+      <select id="examFilter">
+        <option value="">All Exams</option>
+      </select>
+      <button id="applyFilters">Apply</button>
+      <button id="addAllocation">Add Allocation</button>
+    </div>
+    <div class="card">
+      <table id="allocationsTable">
+        <thead>
+          <tr>
+            <th>Exam</th>
+            <th>Date</th>
+            <th>Faculty</th>
+            <th>Room</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody class="loading">
+          <tr><td colspan="5">Loading allocations...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script src="/allocations.js"></script>
+</body>
+</html>

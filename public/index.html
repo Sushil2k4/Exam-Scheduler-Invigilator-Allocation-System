@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Exam Scheduler</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="login-container">
+    <div class="header">
+      <div class="logo">ESIAS</div>
+      <h1 class="title">Exam Scheduler and Invigilator Allocation System</h1>
+      <div class="wave"></div>
+    </div>
+    
+    <div class="login-form">
+      <div class="tabs">
+        <button class="tab active" data-tab="student">Student</button>
+        <button class="tab" data-tab="teacher">Teacher</button>
+        <button class="tab" data-tab="admin">Admin</button>
+      </div>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="userId">ID</label>
+          <input type="text" id="userId" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required>
+        </div>
+        <button type="submit" class="login-btn">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+</body>
+</html>
