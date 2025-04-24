@@ -2,6 +2,9 @@ const pool = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+// Common password for all students
+const STUDENT_PASSWORD = 'student@123';
+
 const login = async (studentId, password) => {
   try {
     // Verify student exists
@@ -14,14 +17,17 @@ const login = async (studentId, password) => {
       throw new Error('Invalid student ID');
     }
 
-    // In a real system, you would verify password here
-    // For demo, we'll just check the ID exists
+    // Verify password
+    if (password !== STUDENT_PASSWORD) {
+      throw new Error('Invalid password');
+    }
+
     const student = rows[0];
     
     // Generate token
     const token = jwt.sign(
       { id: student.student_id, role: 'student' },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'development_secret',
       { expiresIn: '1h' }
     );
 

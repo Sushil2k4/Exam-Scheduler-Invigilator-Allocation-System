@@ -95,4 +95,68 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Get all available exams for invigilation
+router.get('/available', async (req, res) => {
+  try {
+    // Check if user is a teacher
+    if (req.user.role !== 'teacher') {
+      return res.status(403).json({ error: 'Only teachers can access this endpoint' });
+    }
+
+    const query = `
+      WITH RoomAllocations AS (
+        SELECT DISTINCT ON (e.exam_id, r.room_id)
+          e.exam_id,
+          r.room_id,
+          r.room_no,
+          r.building,
+          r.capacity,
+          a.faculty_id,
+          f.name as faculty_name
+        FROM Exam e
+        LEFT JOIN Allocation a ON e.exam_id = a.exam_id
+        LEFT JOIN Room r ON a.room_id = r.room_id
+        LEFT JOIN Faculty f ON a.faculty_id = f.faculty_id
+      )
+      SELECT 
+        e.exam_id,
+        e.subject,
+        e.date,
+        TO_CHAR(e.date, 'FMDay, DD Month YYYY') as formatted_date,
+        e.start_time,
+        e.end_time,
+        e.start_time || ' - ' || e.end_time AS time_slot,
+        e.semester,
+        CASE 
+          WHEN EXISTS (
+            SELECT 1 FROM Allocation a2 WHERE a2.exam_id = e.exam_id
+          ) THEN true 
+          ELSE false 
+        END as is_allocated,
+        ra.room_no,
+        ra.building,
+        ra.capacity,
+        CASE 
+          WHEN ra.faculty_id = $1 THEN true
+          ELSE false
+        END as is_assigned_to_me,
+        ra.faculty_name as assigned_faculty
+      FROM Exam e
+      LEFT JOIN RoomAllocations ra ON e.exam_id = ra.exam_id
+      WHERE e.date >= CURRENT_DATE
+      ORDER BY e.date ASC, e.start_time ASC
+    `;
+
+    const { rows } = await pool.query(query, [req.user.id]);
+    
+    // Add debug logging
+    console.log('Available exams query result:', rows);
+    
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching available exams:', err);
+    res.status(500).json({ error: 'Failed to fetch available exams' });
+  }
+});
+
 module.exports = router;

@@ -2,148 +2,404 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const mongoSanitize = require('express-mongo-sanitize');
-const hpp = require('hpp');
+const pool = require('./db');
 
 // Route imports
 const studentRoutes = require('./routes/students');
 const examRoutes = require('./routes/exams');
 const allocationRoutes = require('./routes/allocations');
-const authRoutes = require('./routes/auth');
+const { login: studentLogin } = require('./auth/studentAuth');
+const { login: teacherLogin } = require('./auth/teacherAuth');
 
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security Middleware
-app.use(helmet());
-app.use(mongoSanitize());
-app.use(hpp());
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later'
-});
-app.use('/api', limiter);
-
-// Standard Middleware
+// Middleware
 app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true
 }));
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
-app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Static files
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Authentication Middleware
-const authenticate = (roles = []) => {
-  return (req, res, next) => {
-    // 1) Get token from headers or cookies
-    let token;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1];
-    } else if (req.cookies.jwt) {
-      token = req.cookies.jwt;
-    }
+const authenticate = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ error: 'Authentication token required' });
+  }
 
-    if (!token) {
-      return res.status(401).json({
-        status: 'fail',
-        message: 'You are not logged in! Please log in to get access.'
-      });
-    }
-
-    // 2) Verify token
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (err) {
-        return res.status(401).json({
-          status: 'fail',
-          message: 'Invalid token! Please log in again.'
-        });
-      }
-
-      // 3) Check if user still exists (would query DB in production)
-      // This is just a basic example
-      if (!decoded.id) {
-        return res.status(401).json({
-          status: 'fail',
-          message: 'The user belonging to this token no longer exists.'
-        });
-      }
-
-      // 4) Check if user has permission to access the route
-      if (roles.length && !roles.includes(decoded.role)) {
-        return res.status(403).json({
-          status: 'fail',
-          message: 'You do not have permission to perform this action'
-        });
-      }
-
-      // 5) Grant access to protected route
-      req.user = decoded;
-      next();
-    });
-  };
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'development_secret');
+    req.user = decoded;
+    next();
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid or expired token' });
+  }
 };
 
-// Routes
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/students', authenticate(['admin', 'teacher']), studentRoutes);
-app.use('/api/v1/exams', authenticate(['admin', 'teacher']), examRoutes);
-app.use('/api/v1/allocations', authenticate(['admin']), allocationRoutes);
+// Public route for exam schedule lookup
+app.get('/api/students/:studentId/exams', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        console.log('Received request for student ID:', studentId);
 
-// Serve frontend
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+        // First, check if the student exists
+        try {
+            const studentQuery = 'SELECT student_id, department FROM Student WHERE student_id = $1';
+            console.log('Executing student query:', studentQuery, 'with ID:', studentId);
+            const studentResult = await pool.query(studentQuery, [studentId]);
+            console.log('Student query result:', studentResult.rows);
+
+            if (studentResult.rows.length === 0) {
+                console.log('No student found with ID:', studentId);
+                return res.status(404).json({
+                    error: 'Student not found',
+                    message: 'No student found with this registration number'
+                });
+            }
+
+            // Now get the exams
+            const examQuery = `
+                SELECT DISTINCT ON (e.exam_id)
+                    e.exam_id,
+                    e.subject,
+                    e.date,
+                    TO_CHAR(e.date, 'FMDay, DD Month YYYY') as formatted_date,
+                    e.start_time,
+                    e.end_time,
+                    e.start_time || ' - ' || e.end_time AS time_slot,
+                    e.semester,
+                    r.building,
+                    r.room_no,
+                    COALESCE(r.building || ' Room ' || r.room_no, 'Not assigned') AS location,
+                    COALESCE(f.name, 'Not assigned') AS invigilator,
+                    s.department
+                FROM Student s
+                JOIN TimeTable tt ON s.student_id = tt.student_id
+                JOIN Exam e ON tt.exam_id = e.exam_id
+                LEFT JOIN Room r ON tt.room_id = r.room_id
+                LEFT JOIN Allocation a ON e.exam_id = a.exam_id
+                LEFT JOIN Faculty f ON a.faculty_id = f.faculty_id
+                WHERE s.student_id = $1
+                ORDER BY e.exam_id, e.date ASC, e.start_time ASC;
+            `;
+
+            console.log('Executing exam query for student:', studentId);
+            const { rows } = await pool.query(examQuery, [studentId]);
+            console.log('Found', rows.length, 'exams for student:', studentId);
+
+            if (rows.length === 0) {
+                return res.status(404).json({
+                    error: 'No exams found',
+                    message: 'No exams are scheduled for this registration number'
+                });
+            }
+
+            // Format the response
+            const response = {
+                student_id: studentId,
+                department: rows[0].department,
+                exams: rows.map(exam => ({
+                    exam_id: exam.exam_id,
+                    subject: exam.subject,
+                    formatted_date: exam.formatted_date,
+                    time_slot: exam.time_slot,
+                    location: exam.location || 'Not assigned',
+                    invigilator: exam.invigilator || 'Not assigned',
+                    semester: exam.semester
+                }))
+            };
+
+            console.log('Sending response for student:', studentId);
+            res.json(response);
+
+        } catch (dbError) {
+            console.error('Database error:', dbError);
+            throw new Error('Database error: ' + dbError.message);
+        }
+
+    } catch (err) {
+        console.error('Error in exam lookup:', err);
+        res.status(500).json({
+            error: 'Internal server error',
+            message: 'Failed to fetch exam schedule. Please try again later.',
+            details: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
+    }
+});
+
+// Login Endpoints
+app.post('/api/auth/student/login', async (req, res) => {
+  try {
+    const { studentId, password } = req.body;
+    
+    if (!studentId || !password) {
+      return res.status(400).json({ error: 'Student ID and password are required' });
+    }
+
+    const result = await studentLogin(studentId, password);
+    res.json(result);
+  } catch (err) {
+    console.error('Student login error:', err);
+    res.status(401).json({ error: err.message || 'Invalid credentials' });
+  }
+});
+
+app.post('/api/auth/teacher/login', async (req, res) => {
+  try {
+    const { facultyId, password } = req.body;
+    
+    if (!facultyId || !password) {
+      return res.status(400).json({ error: 'Faculty ID and password are required' });
+    }
+
+    const result = await teacherLogin(facultyId, password);
+    res.json(result);
+  } catch (err) {
+    console.error('Teacher login error:', err);
+    res.status(401).json({ error: err.message || 'Invalid credentials' });
+  }
+});
+
+// Admin login (if needed)
+app.post('/api/auth/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  
+  if (username === 'admin' && password === 'admin@123') {
+    const token = jwt.sign(
+      { id: 'admin', role: 'admin' },
+      process.env.JWT_SECRET || 'development_secret',
+      { expiresIn: '1h' }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: 'admin',
+        name: 'Administrator',
+        role: 'admin'
+      }
+    });
+  } else {
+    res.status(401).json({ error: 'Invalid admin credentials' });
+  }
+});
+
+// Protected Routes
+app.use('/api/students', authenticate, studentRoutes);
+app.use('/api/exams', authenticate, examRoutes);
+app.use('/api/allocations', authenticate, allocationRoutes);
+
+// User details endpoints
+app.get('/api/students/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    console.log('Fetching details for student:', studentId);
+
+    // Using first_name and last_name as shown in the table structure
+    const query = `
+      SELECT 
+        student_id,
+        first_name || ' ' || last_name AS name,
+        department
+      FROM Student 
+      WHERE student_id = $1
+    `;
+    console.log('Executing query:', query);
+    
+    const result = await pool.query(query, [studentId]);
+    console.log('Query result:', result.rows);
+
+    if (result.rows.length === 0) {
+      console.log('No student found with ID:', studentId);
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Log the response being sent
+    console.log('Sending student data:', result.rows[0]);
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching student details:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch student details',
+      details: error.message 
+    });
+  }
+});
+
+app.get('/api/teachers/:facultyId', async (req, res) => {
+  try {
+    const { facultyId } = req.params;
+    const result = await pool.query(
+      'SELECT faculty_id, name, department FROM Faculty WHERE faculty_id = $1',
+      [facultyId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Faculty member not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching faculty details:', error);
+    res.status(500).json({ error: 'Failed to fetch faculty details' });
+  }
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'healthy',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Statistics endpoints
+app.get('/api/statistics/students', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT COUNT(*) as count FROM Student');
+        res.json({ count: result.rows[0].count });
+    } catch (error) {
+        console.error('Error getting student count:', error);
+        res.status(500).json({ error: 'Failed to get student count' });
+    }
+});
+
+app.get('/api/statistics/upcoming-exams', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT COUNT(*) as count 
+            FROM Exam 
+            WHERE date >= CURRENT_DATE
+        `);
+        res.json({ count: result.rows[0].count });
+    } catch (error) {
+        console.error('Error getting upcoming exams count:', error);
+        res.status(500).json({ error: 'Failed to get upcoming exams count' });
+    }
+});
+
+app.get('/api/statistics/pending-allocations', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT COUNT(*) as count 
+            FROM Exam e 
+            LEFT JOIN Allocation a ON e.exam_id = a.exam_id 
+            WHERE a.faculty_id IS NULL AND e.date >= CURRENT_DATE
+        `);
+        res.json({ count: result.rows[0].count });
+    } catch (error) {
+        console.error('Error getting pending allocations count:', error);
+        res.status(500).json({ error: 'Failed to get pending allocations count' });
+    }
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
-
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message
+  console.error('[ERROR]', err.stack);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.error(err.name, err.message);
-  server.close(() => {
-    process.exit(1);
+// Start server with port conflict handling
+const startServer = (port) => {
+  const server = app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+    console.log('Available endpoints:');
+    console.log(`- POST http://localhost:${port}/api/auth/student/login`);
+    console.log(`- POST http://localhost:${port}/api/auth/teacher/login`);
+    console.log(`- POST http://localhost:${port}/api/auth/admin/login`);
+    console.log(`- GET  http://localhost:${port}/api/students`);
+    console.log(`- GET  http://localhost:${port}/api/exams`);
+    console.log(`- GET  http://localhost:${port}/api/allocations`);
+    console.log(`- GET  http://localhost:${port}/api/health`);
   });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.warn(`Port ${port} is already in use, trying port ${port + 1}...`);
+      startServer(port + 1);
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
+};
+
+// Start the server
+startServer(PORT);
+
+// Handle process termination
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Shutting down gracefully...');
+  process.exit(0);
 });
 
-// Start server
-const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
-  console.log(`Database: ${process.env.DB_NAME}`);
-  console.log('Available routes:');
-  console.log(`- http://localhost:${PORT}/api/v1/auth/login`);
-  console.log(`- http://localhost:${PORT}/api/v1/students`);
-  console.log(`- http://localhost:${PORT}/api/v1/exams`);
-  console.log(`- http://localhost:${PORT}/api/v1/allocations`);
+process.on('SIGINT', () => {
+  console.log('SIGINT received. Shutting down gracefully...');
+  process.exit(0);
 });
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-  console.error(err.name, err.message);
-  server.close(() => {
-    process.exit(1);
-  });
+app.get('/api/exams/:studentId', async (req, res) => {
+    const studentId = req.params.studentId;
+    console.log('Received request for student ID:', studentId);
+
+    try {
+        // First check if student exists
+        const studentQuery = `
+            SELECT student_id, department 
+            FROM Student 
+            WHERE student_id = $1
+        `;
+        console.log('Executing student query:', studentQuery, 'with ID:', studentId);
+        const studentResult = await pool.query(studentQuery, [studentId]);
+        console.log('Student query result:', studentResult.rows);
+
+        if (studentResult.rows.length === 0) {
+            console.log('No student found with ID:', studentId);
+            return res.status(404).json({ error: 'Student not found' });
+        }
+
+        // Get exam schedule for the student
+        const examQuery = `
+            SELECT 
+                s.student_id,
+                s.department,
+                e.exam_id,
+                e.subject,
+                e.date,
+                e.start_time,
+                e.end_time,
+                r.building,
+                r.room_no
+            FROM Student s
+            JOIN TimeTable t ON s.student_id = t.student_id
+            JOIN Exam e ON t.exam_id = e.exam_id
+            LEFT JOIN Room r ON t.room_id = r.room_id
+            WHERE s.student_id = $1
+            ORDER BY e.date, e.start_time
+        `;
+        
+        console.log('Executing exam query for student:', studentId);
+        const examResult = await pool.query(examQuery, [studentId]);
+        console.log('Found', examResult.rows.length, 'exams for student:', studentId);
+
+        if (examResult.rows.length === 0) {
+            return res.status(404).json({ error: 'No exam schedule found for this student' });
+        }
+
+        res.json(examResult.rows);
+    } catch (err) {
+        console.error('Error fetching exam schedule:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });

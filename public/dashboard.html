@@ -3,52 +3,440 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard | ESIAS</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <title>Dashboard - ESIAS</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #4169E1;
+      --primary-light: #f0f4ff;
+      --secondary: #FF6B6B;
+      --accent: #4ECDC4;
+      --background: rgba(245, 247, 250, 0.85);
+      --text: #2D3436;
+      --card-bg: rgba(255, 255, 255, 0.95);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      position: relative;
+      background-color: #f0f2f5;
+    }
+
+    /* Hero Background */
+    .hero-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+          rgba(255, 255, 255, 0.65),
+          rgba(255, 255, 255, 0.7)
+        ),
+        url('/images/srm.jpg') no-repeat center center;
+      background-size: cover;
+      z-index: -1;
+      filter: saturate(1.1) brightness(1.05);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+    }
+
+    /* Header styles */
+    header {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary));
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .logo {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 15px rgba(65, 105, 225, 0.2);
+    }
+
+    .brand-text {
+      color: #666;
+      font-size: 0.9rem;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .user-id {
+      color: var(--primary);
+      font-weight: 500;
+      position: relative;
+      padding: 0.5rem 1rem;
+      background: var(--primary-light);
+      border-radius: 20px;
+    }
+
+    .logout-btn {
+      color: var(--primary);
+      text-decoration: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 20px;
+      transition: all 0.3s;
+      border: 2px solid var(--primary);
+    }
+
+    .logout-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Welcome section */
+    .welcome-section {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .welcome-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .greeting {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .user-name {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .datetime {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .datetime .material-icons {
+      font-size: 1.2rem;
+      color: var(--primary);
+    }
+
+    /* Exam Schedule Section */
+    .exam-schedule-section {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-top: 2rem;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .exam-schedule-section h2 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    th {
+      background: var(--primary-light);
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    tr:hover {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Loading spinner */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Error message */
+    .error-message {
+      background: #ffebee;
+      border: 1px solid #ffcdd2;
+      color: #c62828;
+      padding: 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <div class="dashboard">
-    <header class="dashboard-header">
-      <div class="logo">ESIAS</div>
-      <h1>Exam Scheduler and Invigilator Allocation System</h1>
-      <button id="logoutBtn" class="logout-btn">Logout</button>
-    </header>
-    
-    <nav class="dashboard-nav">
-      <a href="/students.html" class="nav-link">Students</a>
-      <a href="/exams.html" class="nav-link">Exams</a>
-      <a href="/allocations.html" class="nav-link">Allocations</a>
-    </nav>
-    
-    <main class="dashboard-content">
-      <!-- Content will be loaded here based on navigation -->
-      <div class="welcome-message">
-        <h2>Welcome, <span id="userName"></span>!</h2>
-        <p>Select an option from the navigation menu to begin.</p>
+  <div class="hero-background"></div>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">
+          <span>ESIAS</span>
+        </div>
+        <div>
+          <h1>Exam Scheduler</h1>
+          <p class="brand-text">Invigilator Allocation System</p>
+        </div>
       </div>
-    </main>
+      <div class="user-info">
+        <span class="user-id" id="studentId"></span>
+        <a href="#" class="logout-btn" onclick="logout()">Logout</a>
+      </div>
+    </header>
+
+    <div class="welcome-section">
+      <div class="welcome-header">
+        <div class="greeting">
+          <h1>Welcome, <span id="userName">Student</span>!</h1>
+          <div class="datetime">
+            <span class="material-icons">event</span>
+            <span id="currentDate"></span>
+            <span class="material-icons">schedule</span>
+            <span id="currentTime"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exam-schedule-section">
+      <h2>Your Exam Schedule</h2>
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+      </div>
+      <div id="errorMessage" class="error-message">
+        <span class="material-icons">error</span>
+        <span id="errorText"></span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Room Number</th>
+            <th>Invigilator</th>
+          </tr>
+        </thead>
+        <tbody id="examTableBody"></tbody>
+      </table>
+    </div>
   </div>
 
-  <script src="/js/auth.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Check authentication
-      if (!localStorage.getItem('authToken')) {
-        window.location.href = '/';
+    // Check authentication on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!localStorage.getItem('token')) {
+        window.location.href = 'login.html';
+        return;
       }
-      
-      // Display user info
-      const token = localStorage.getItem('authToken');
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      document.getElementById('userName').textContent = payload.id;
-      
-      // Logout button
-      document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userRole');
-        window.location.href = '/';
-      });
+
+      // Set up date and time
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
+
+      // Load user info and exam schedule
+      loadUserInfo();
+      loadExamSchedule();
     });
+
+    function updateDateTime() {
+      const now = new Date();
+      const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+      
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', dateOptions);
+      document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', timeOptions);
+    }
+
+    function logout() {
+      // Clear all stored data
+      localStorage.clear();
+      sessionStorage.clear();
+      // Redirect to the login page
+      window.location.href = '/index.html';
+    }
+
+    async function loadUserInfo() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const studentId = payload.id;
+        
+        document.getElementById('studentId').textContent = studentId;
+
+        // Get user info from localStorage that was saved during login
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        if (userInfo && userInfo.name) {
+          document.getElementById('userName').textContent = userInfo.name;
+          return;
+        }
+
+        // Fallback to API call if userInfo is not in localStorage
+        const response = await fetch(`/api/students/${studentId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch user info');
+        }
+        const data = await response.json();
+        
+        if (data && data.name) {
+          document.getElementById('userName').textContent = data.name;
+          // Save to localStorage for future use
+          localStorage.setItem('userInfo', JSON.stringify(data));
+        } else {
+          console.error('No name data received from server');
+          document.getElementById('userName').textContent = 'Student';
+        }
+      } catch (error) {
+        console.error('Error loading user info:', error);
+        document.getElementById('userName').textContent = 'Student';
+      }
+    }
+
+    async function loadExamSchedule() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const studentId = payload.id;
+        
+        document.getElementById('loading').style.display = 'block';
+        
+        const response = await fetch(`/api/students/${studentId}/exams`);
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.message || data.error);
+        }
+
+        displayExams(data.exams);
+      } catch (error) {
+        console.error('Error:', error);
+        showError(error.message || 'Failed to fetch exam schedule');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    function displayExams(exams) {
+      const examTableBody = document.getElementById('examTableBody');
+      examTableBody.innerHTML = '';
+
+      exams.forEach(exam => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${exam.subject}</td>
+          <td>${exam.formatted_date}</td>
+          <td>${exam.time_slot}</td>
+          <td>${exam.location}</td>
+          <td>${exam.invigilator}</td>
+        `;
+        examTableBody.appendChild(row);
+      });
+    }
+
+    function showError(message) {
+      const errorMessage = document.getElementById('errorMessage');
+      const errorText = document.getElementById('errorText');
+      errorText.textContent = message;
+      errorMessage.style.display = 'flex';
+      errorMessage.style.alignItems = 'center';
+      errorMessage.style.gap = '8px';
+    }
   </script>
 </body>
 </html>

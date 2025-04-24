@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard - ESIAS</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #4169E1;
+      --primary-light: #f0f4ff;
+      --secondary: #FF6B6B;
+      --accent: #4ECDC4;
+      --success: #2ecc71;
+      --background: rgba(245, 247, 250, 0.85);
+      --text: #2D3436;
+      --card-bg: rgba(255, 255, 255, 0.95);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      position: relative;
+      background-color: #f0f2f5;
+    }
+
+    /* Hero Background */
+    .hero-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+          rgba(255, 255, 255, 0.65),
+          rgba(255, 255, 255, 0.7)
+        ),
+        url('/images/srm.jpg') no-repeat center center;
+      background-size: cover;
+      z-index: -1;
+      filter: saturate(1.1) brightness(1.05);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+    }
+
+    /* Header styles */
+    header {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .logo {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 15px rgba(65, 105, 225, 0.2);
+    }
+
+    .brand-text {
+      color: #666;
+      font-size: 0.9rem;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .user-id {
+      color: var(--primary);
+      font-weight: 500;
+      position: relative;
+      padding: 0.5rem 1rem;
+      background: var(--primary-light);
+      border-radius: 20px;
+    }
+
+    .logout-btn {
+      color: var(--primary);
+      text-decoration: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 20px;
+      transition: all 0.3s;
+      border: 2px solid var(--primary);
+    }
+
+    .logout-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Welcome section */
+    .welcome-section {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .welcome-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .greeting {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .datetime {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .datetime .material-icons {
+      font-size: 1.2rem;
+      color: var(--primary);
+    }
+
+    /* Exam Schedule Section */
+    .exam-schedule-section {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .exam-schedule-section h2 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .exam-schedule-section h2::before {
+      font-family: 'Material Icons';
+      font-size: 1.5rem;
+    }
+
+    .exam-schedule-section:first-of-type h2::before {
+      content: 'event_available';
+    }
+
+    .exam-schedule-section:last-of-type h2::before {
+      content: 'assignment_turned_in';
+    }
+
+    .exam-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .exam-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      padding: 1.25rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .exam-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .exam-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .exam-card.unavailable {
+      opacity: 0.7;
+      background: rgba(245, 245, 245, 0.9);
+    }
+
+    .exam-card.my-assignment {
+      border: 2px solid #4CAF50;
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(255, 255, 255, 0.9) 100%);
+    }
+
+    .exam-card.my-assignment::before {
+      content: "Assigned";
+      position: absolute;
+      top: 10px;
+      right: -35px;
+      background: #4CAF50;
+      color: white;
+      padding: 4px 35px;
+      transform: rotate(45deg);
+      font-size: 11px;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .exam-header {
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding-bottom: 8px;
+    }
+
+    .exam-subject {
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .exam-details {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .exam-detail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #555;
+      font-size: 0.9em;
+    }
+
+    .exam-detail .material-icons {
+      font-size: 18px;
+      color: #666;
+    }
+
+    .toggle-container {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .toggle-label {
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    .room-assigned {
+      margin-top: 8px;
+      padding: 6px;
+      background: #e8f5e9;
+      border-radius: 6px;
+      color: #2e7d32;
+      font-weight: 500;
+      text-align: center;
+      font-size: 0.9em;
+    }
+
+    #examGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .exam-schedule-section {
+        padding: 1.5rem;
+      }
+
+      .exam-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--success);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    /* Loading spinner */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .dashboard-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 1200px) {
+      .dashboard-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Empty state styles */
+    .empty-state {
+      text-align: center;
+      color: #666;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 12px;
+    }
+
+    .empty-state .material-icons {
+      font-size: 48px;
+      margin-bottom: 16px;
+      color: #999;
+    }
+
+    .empty-state p {
+      font-size: 0.95em;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero-background"></div>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">
+          <span>ESIAS</span>
+        </div>
+        <div>
+          <h1>Exam Scheduler</h1>
+          <p class="brand-text">Invigilator Allocation System</p>
+        </div>
+      </div>
+      <div class="user-info">
+        <span class="user-id" id="facultyId"></span>
+        <a href="#" class="logout-btn" onclick="logout()">Logout</a>
+      </div>
+    </header>
+
+    <div class="welcome-section">
+      <div class="welcome-header">
+        <div class="greeting">
+          <h1>Welcome, <span id="teacherName">Faculty</span>!</h1>
+          <div class="datetime">
+            <span class="material-icons">event</span>
+            <span id="currentDate"></span>
+            <span class="material-icons">schedule</span>
+            <span id="currentTime"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-content">
+      <div class="exam-schedule-section">
+        <h2>Available Exams</h2>
+        <div id="loading" class="loading">
+          <div class="spinner"></div>
+        </div>
+        <div id="examGrid" class="exam-grid">
+          <!-- Available exam cards will be dynamically added here -->
+        </div>
+      </div>
+
+      <div class="exam-schedule-section">
+        <h2>My Selected Exams</h2>
+        <div id="selectedExamsLoading" class="loading">
+          <div class="spinner"></div>
+        </div>
+        <div id="selectedExamsGrid" class="exam-grid">
+          <!-- Selected exam cards will be dynamically added here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check authentication on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!localStorage.getItem('token')) {
+        window.location.href = '/index.html';
+        return;
+      }
+
+      // Set up date and time
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
+
+      // Load user info and exam schedule
+      loadUserInfo();
+      loadExamSchedule();
+    });
+
+    function updateDateTime() {
+      const now = new Date();
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+
+    function loadUserInfo() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        document.getElementById('facultyId').textContent = payload.id;
+        
+        // Fetch teacher's name from the server
+        fetch(`/api/teachers/${payload.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.name) {
+            document.getElementById('teacherName').textContent = data.name;
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching faculty name:', error);
+          document.getElementById('teacherName').textContent = payload.id;
+        });
+      } catch (error) {
+        console.error('Error loading user info:', error);
+        document.getElementById('facultyId').textContent = 'Unknown ID';
+        document.getElementById('teacherName').textContent = '';
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = '/index.html';
+    }
+
+    async function loadExamSchedule() {
+      try {
+        document.getElementById('loading').style.display = 'block';
+        
+        const response = await fetch('/api/exams/available', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch exam schedule');
+        }
+        
+        const exams = await response.json();
+        console.log('Received exams:', exams); // Debug log
+        window.allExams = exams; // Store exams globally
+        displayExams(exams);
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('examGrid').innerHTML = `
+          <div class="empty-state">
+            <span class="material-icons">error_outline</span>
+            <p>Failed to load exam schedule. Please try again later.</p>
+          </div>
+        `;
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    function displayExams(exams) {
+      const examGrid = document.getElementById('examGrid');
+      const selectedExamsGrid = document.getElementById('selectedExamsGrid');
+      examGrid.innerHTML = '';
+      selectedExamsGrid.innerHTML = '';
+
+      if (!exams || exams.length === 0) {
+        examGrid.innerHTML = `
+          <div class="empty-state">
+            <span class="material-icons">event_busy</span>
+            <p>No exams are currently available for invigilation.</p>
+          </div>
+        `;
+        selectedExamsGrid.innerHTML = `
+          <div class="empty-state">
+            <span class="material-icons">assignment_ind</span>
+            <p>You haven't selected any exams for invigilation yet.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Split exams into available and selected
+      const availableExams = exams.filter(exam => !exam.is_assigned_to_me && !exam.is_allocated);
+      const selectedExams = exams.filter(exam => exam.is_assigned_to_me);
+
+      // Display available exams
+      if (availableExams.length === 0) {
+        examGrid.innerHTML = `
+          <div class="empty-state">
+            <span class="material-icons">event_busy</span>
+            <p>No exams are currently available for invigilation.</p>
+          </div>
+        `;
+      } else {
+        availableExams.forEach(exam => {
+          const card = createExamCard(exam);
+          examGrid.appendChild(card);
+        });
+      }
+
+      // Display selected exams
+      if (selectedExams.length === 0) {
+        selectedExamsGrid.innerHTML = `
+          <div class="empty-state">
+            <span class="material-icons">assignment_ind</span>
+            <p>You haven't selected any exams for invigilation yet.</p>
+          </div>
+        `;
+      } else {
+        selectedExams.forEach(exam => {
+          const card = createExamCard(exam);
+          selectedExamsGrid.appendChild(card);
+        });
+      }
+    }
+
+    function createExamCard(exam) {
+      const card = document.createElement('div');
+      card.className = 'exam-card';
+      card.dataset.examId = exam.exam_id;
+      
+      if (exam.is_allocated) {
+        card.classList.add('unavailable');
+      }
+      if (exam.is_assigned_to_me) {
+        card.classList.add('my-assignment');
+      }
+
+      const formattedDate = exam.formatted_date || new Date(exam.date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      card.innerHTML = `
+        <div class="exam-header">
+          <div class="exam-subject">${exam.subject || 'Untitled Exam'}</div>
+        </div>
+        <div class="exam-details">
+          <div class="exam-detail">
+            <span class="material-icons">event</span>
+            <span>${formattedDate}</span>
+          </div>
+          <div class="exam-detail">
+            <span class="material-icons">schedule</span>
+            <span>${exam.time_slot || `${exam.start_time} - ${exam.end_time}` || 'Time not set'}</span>
+          </div>
+          <div class="exam-detail">
+            <span class="material-icons">school</span>
+            <span>Semester ${exam.semester || 'N/A'}</span>
+          </div>
+          ${exam.building && exam.room_no ? `
+            <div class="exam-detail">
+              <span class="material-icons">location_on</span>
+              <span>${exam.building} - Room ${exam.room_no}</span>
+            </div>
+          ` : ''}
+          ${exam.is_allocated ? `
+            <div class="exam-detail">
+              <span class="material-icons">person</span>
+              <span>Assigned to: ${exam.assigned_faculty || 'Unknown'}</span>
+            </div>
+          ` : ''}
+        </div>
+        ${!exam.is_allocated || exam.is_assigned_to_me ? `
+          <div class="toggle-container">
+            <span class="toggle-label">Available for Invigilation?</span>
+            <label class="switch">
+              <input type="checkbox" onchange="toggleAvailability('${exam.exam_id}', this)" ${exam.is_assigned_to_me ? 'checked' : ''}>
+              <span class="slider"></span>
+            </label>
+          </div>
+        ` : ''}
+        ${exam.is_assigned_to_me ? `
+          <div class="room-assigned" id="room-${exam.exam_id}" style="display: block;">
+            Assigned to Room ${exam.room_no}
+          </div>
+        ` : ''}
+      `;
+
+      return card;
+    }
+
+    async function toggleAvailability(examId, checkbox) {
+      try {
+        // If trying to mark as available, check for conflicts first
+        if (checkbox.checked) {
+          const currentExam = findExamById(examId);
+          if (!currentExam) {
+            throw new Error('Exam not found');
+          }
+
+          // Get all exams where the teacher is already assigned
+          const assignedExams = window.allExams.filter(exam => exam.is_assigned_to_me);
+          
+          // Check for time conflicts
+          const conflict = assignedExams.find(exam => {
+            return exam.date === currentExam.date && 
+                   exam.start_time === currentExam.start_time &&
+                   exam.end_time === currentExam.end_time;
+          });
+
+          if (conflict) {
+            throw new Error(`You are already assigned to invigilate "${conflict.subject}" at this time slot (${currentExam.time_slot})`);
+          }
+        }
+
+        const response = await fetch('/api/allocations/assign', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            exam_id: examId,
+            available: checkbox.checked
+          })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to update availability');
+        }
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        // Only refresh the exam schedule if the update was successful
+        await loadExamSchedule();
+      } catch (error) {
+        console.error('Error:', error);
+        // Revert the checkbox state
+        checkbox.checked = !checkbox.checked;
+        alert(error.message || 'Failed to update availability. Please try again.');
+      }
+    }
+
+    // Helper function to find exam by ID
+    function findExamById(examId) {
+      return window.allExams.find(exam => exam.exam_id === examId);
+    }
+  </script>
+</body>
+</html> 

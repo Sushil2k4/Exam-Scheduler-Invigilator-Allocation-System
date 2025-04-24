@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Exam Scheduler</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="glass-card">
+            <header>
+                <h1>Student Dashboard</h1>
+                <div class="user-info">
+                    <span id="studentName">Loading...</span>
+                    <button onclick="logout()" class="logout-btn">Logout</button>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
+                <h2>Your Upcoming Exams</h2>
+                <div class="exams-container" id="examsList">
+                    <!-- Exams will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+
+        // Decode JWT token to get user info
+        const userInfo = JSON.parse(atob(token.split('.')[1]));
+        document.getElementById('studentName').textContent = userInfo.name;
+
+        // Fetch and display exams
+        async function fetchExams() {
+            try {
+                const response = await fetch('/api/students/exams', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch exams');
+                }
+
+                const exams = await response.json();
+                displayExams(exams);
+            } catch (error) {
+                console.error('Error fetching exams:', error);
+                alert('Failed to load exams. Please try again later.');
+            }
+        }
+
+        function displayExams(exams) {
+            const examsList = document.getElementById('examsList');
+            examsList.innerHTML = '';
+
+            if (exams.length === 0) {
+                examsList.innerHTML = '<p class="no-exams">No exams scheduled yet.</p>';
+                return;
+            }
+
+            exams.forEach(exam => {
+                const examCard = document.createElement('div');
+                examCard.className = 'exam-card';
+                
+                const date = new Date(exam.date);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                examCard.innerHTML = `
+                    <div class="exam-header">
+                        <h3>${exam.subject}</h3>
+                        <span class="exam-id">Exam ID: ${exam.exam_id}</span>
+                    </div>
+                    <div class="exam-details">
+                        <p><i class="fas fa-calendar"></i> ${formattedDate}</p>
+                        <p><i class="fas fa-clock"></i> ${exam.start_time} - ${exam.end_time}</p>
+                        <p><i class="fas fa-building"></i> ${exam.building || 'TBD'} - Room ${exam.room_no || 'TBD'}</p>
+                        <p><i class="fas fa-graduation-cap"></i> Semester ${exam.semester}</p>
+                        <p><i class="fas fa-university"></i> ${exam.department}</p>
+                    </div>
+                `;
+
+                examsList.appendChild(examCard);
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+        }
+
+        // Fetch exams when page loads
+        fetchExams();
+    </script>
+</body>
+</html> 

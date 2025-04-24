@@ -19,33 +19,74 @@ document.addEventListener('DOMContentLoaded', () => {
       const userId = document.getElementById('userId').value;
       const password = document.getElementById('password').value;
       
+      if (!userId || !password) {
+        showError('Please enter both ID and password');
+        return;
+      }
+
       try {
-        const response = await fetch('/api/auth/login', {
+        let endpoint = '';
+        let requestBody = {};
+
+        switch (currentRole) {
+          case 'student':
+            endpoint = '/api/auth/student/login';
+            requestBody = { studentId: userId, password };
+            break;
+          case 'teacher':
+            endpoint = '/api/auth/teacher/login';
+            requestBody = { facultyId: userId, password };
+            break;
+          case 'admin':
+            endpoint = '/api/auth/admin/login';
+            requestBody = { username: userId, password };
+            break;
+          default:
+            throw new Error('Invalid role selected');
+        }
+
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            role: currentRole,
-            userId,
-            password
-          })
+          body: JSON.stringify(requestBody)
         });
-  
+
         const data = await response.json();
-  
+
         if (!response.ok) {
-          throw new Error(data.message || 'Login failed');
+          throw new Error(data.error || 'Login failed');
         }
-  
-        // Store token and redirect
+
+        // Store token and user info
         localStorage.setItem('authToken', data.token);
-        localStorage.setItem('userRole', currentRole);
+        localStorage.setItem('userRole', data.user.role);
+        localStorage.setItem('userName', data.user.name);
+
+        // Redirect to dashboard
         window.location.href = '/dashboard.html';
-        
       } catch (error) {
-        alert(error.message);
-        console.error('Login error:', error);
+        showError(error.message);
       }
     });
-  });
+});
+
+function showError(message) {
+    // Create error message element if it doesn't exist
+    let errorElement = document.querySelector('.error-message');
+    if (!errorElement) {
+        errorElement = document.createElement('div');
+        errorElement.className = 'error-message';
+        document.querySelector('.auth-form').prepend(errorElement);
+    }
+
+    // Set error message and show it
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+
+    // Hide error message after 3 seconds
+    setTimeout(() => {
+        errorElement.style.display = 'none';
+    }, 3000);
+}

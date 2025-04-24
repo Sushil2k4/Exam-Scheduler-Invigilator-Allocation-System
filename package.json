@@ -5,7 +5,8 @@
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
-    "dev": "nodemon server/index.js"
+    "dev": "nodemon server/index.js",
+    "reset-deps": "rm -rf node_modules package-lock.json && npm install"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -22,5 +23,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

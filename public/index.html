@@ -3,39 +3,414 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login | Exam Scheduler</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <title>Login - ESIAS</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #4169E1;
+      --primary-hover: #3157d1;
+      --background: #f5f7fa;
+      --error: #c62828;
+      --text: #333;
+      --text-light: #666;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), #4ECDC4);
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .logo {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, var(--primary), #4ECDC4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+      color: white;
+      font-weight: 600;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 15px rgba(65, 105, 225, 0.2);
+    }
+
+    .brand h1 {
+      color: var(--text);
+      margin-bottom: 0.7rem;
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .brand p {
+      color: var(--text-light);
+      font-size: 0.95rem;
+      max-width: 280px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .role-selector {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      padding: 0.4rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+
+    .role-option {
+      flex: 1;
+      padding: 0.8rem 0.5rem;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .role-option .material-icons {
+      font-size: 1.2rem;
+    }
+
+    .role-option.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .role-option:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    label {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-left: 0.2rem;
+    }
+
+    input {
+      padding: 0.9rem 1rem;
+      border: 1.5px solid #e1e5ee;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.3s;
+      font-family: 'Poppins', sans-serif;
+      background: #f8f9fa;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 4px rgba(65, 105, 225, 0.1);
+    }
+
+    .login-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 0.5rem;
+      font-weight: 500;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .login-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(65, 105, 225, 0.2);
+    }
+
+    .error-message {
+      background: #fff2f2;
+      border: 1px solid #ffcdd2;
+      color: var(--error);
+      padding: 1rem 1.2rem;
+      border-radius: 10px;
+      margin-bottom: 1.2rem;
+      display: none;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #userIdLabel {
+      transition: all 0.3s;
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 2rem;
+        margin: 1rem;
+      }
+
+      .role-option {
+        padding: 0.7rem 0.4rem;
+        font-size: 0.85rem;
+      }
+
+      .role-option .material-icons {
+        font-size: 1.1rem;
+      }
+
+      .brand h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="login-container">
-    <div class="header">
-      <div class="logo">ESIAS</div>
-      <h1 class="title">Exam Scheduler and Invigilator Allocation System</h1>
-      <div class="wave"></div>
+    <div class="brand">
+      <div class="logo">
+        <span>ESIAS</span>
+      </div>
+      <h1>Exam Scheduler</h1>
+      <p>Exam Scheduler and Invigilator Allocation System</p>
     </div>
     
-    <div class="login-form">
-      <div class="tabs">
-        <button class="tab active" data-tab="student">Student</button>
-        <button class="tab" data-tab="teacher">Teacher</button>
-        <button class="tab" data-tab="admin">Admin</button>
+    <div class="role-selector">
+      <div class="role-option active" data-role="student">
+        <span class="material-icons">school</span>
+        Student
+      </div>
+      <div class="role-option" data-role="teacher">
+        <span class="material-icons">person</span>
+        Teacher
+      </div>
+      <div class="role-option" data-role="admin">
+        <span class="material-icons">admin_panel_settings</span>
+        Admin
+      </div>
+    </div>
+
+    <div id="errorMessage" class="error-message">
+      <span class="material-icons">error</span>
+      <span id="errorText"></span>
       </div>
       
-      <form id="loginForm">
+    <form id="loginForm" class="login-form" onsubmit="login(event)">
         <div class="form-group">
-          <label for="userId">ID</label>
-          <input type="text" id="userId" required>
+        <label id="userIdLabel" for="userId">Registration Number</label>
+        <input type="text" 
+               id="userId" 
+               name="userId" 
+               placeholder="Enter your registration number"
+               required>
         </div>
+
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" required>
+        <input type="password" 
+               id="password" 
+               name="password"
+               placeholder="Enter your password"
+               required>
         </div>
-        <button type="submit" class="login-btn">Login</button>
+
+      <button type="submit" class="login-btn">Login</button>
       </form>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
     </div>
   </div>
 
-  <script src="/js/auth.js"></script>
+  <script>
+    // Check if already logged in
+    document.addEventListener('DOMContentLoaded', function() {
+      if (localStorage.getItem('token') && localStorage.getItem('userId')) {
+        window.location.href = '/dashboard.html';
+      }
+
+      // Set up role selector
+      const roleOptions = document.querySelectorAll('.role-option');
+      const userIdLabel = document.getElementById('userIdLabel');
+      const userIdInput = document.getElementById('userId');
+
+      roleOptions.forEach(option => {
+        option.addEventListener('click', () => {
+          // Update active state
+          roleOptions.forEach(opt => opt.classList.remove('active'));
+          option.classList.add('active');
+
+          // Update label and placeholder based on role
+          const role = option.dataset.role;
+          switch(role) {
+            case 'student':
+              userIdLabel.textContent = 'Registration Number';
+              userIdInput.placeholder = 'Enter your registration number';
+              break;
+            case 'teacher':
+              userIdLabel.textContent = 'Faculty ID';
+              userIdInput.placeholder = 'Enter your faculty ID';
+              break;
+            case 'admin':
+              userIdLabel.textContent = 'Username';
+              userIdInput.placeholder = 'Enter your username';
+              break;
+          }
+        });
+      });
+    });
+
+    async function login(event) {
+      event.preventDefault();
+      
+      const userId = document.getElementById('userId').value.trim();
+      const password = document.getElementById('password').value;
+      const errorMessage = document.getElementById('errorMessage');
+      const loading = document.getElementById('loading');
+      const loginForm = document.getElementById('loginForm');
+      
+      // Get selected role
+      const selectedRole = document.querySelector('.role-option.active').dataset.role;
+      
+      // Reset UI
+      errorMessage.style.display = 'none';
+      loading.style.display = 'block';
+      loginForm.style.opacity = '0.5';
+
+      try {
+        // Determine endpoint based on role
+        let endpoint = '';
+        let body = {};
+
+        switch(selectedRole) {
+          case 'student':
+            endpoint = '/api/auth/student/login';
+            body = { studentId: userId, password };
+            break;
+          case 'teacher':
+            endpoint = '/api/auth/teacher/login';
+            body = { facultyId: userId, password };
+            break;
+          case 'admin':
+            endpoint = '/api/auth/admin/login';
+            body = { username: userId, password };
+            break;
+        }
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        // Store both token and user info
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userInfo', JSON.stringify(data.user));
+        
+        // Redirect based on user role
+        const userRole = data.user.role;
+        if (userRole === 'teacher') {
+          window.location.href = '/teacher-dashboard.html';
+        } else if (userRole === 'student') {
+          window.location.href = '/dashboard.html';
+        } else if (userRole === 'admin') {
+          window.location.href = '/admin-dashboard.html';
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        document.getElementById('errorText').textContent = error.message;
+        errorMessage.style.display = 'flex';
+      } finally {
+        loading.style.display = 'none';
+        loginForm.style.opacity = '1';
+      }
+    }
+  </script>
 </body>
 </html>
