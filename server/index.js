@@ -12,6 +12,8 @@ const allocationRoutes = require('./routes/allocations');
 const { login: studentLogin } = require('./auth/studentAuth');
 const { login: teacherLogin } = require('./auth/teacherAuth');
 const adminRoutes = require('./routes/admin');
+const facultyRoutes = require('./routes/faculty');
+const authRoutes = require('./routes/auth');
 
 // Initialize Express app
 const app = express();
@@ -197,6 +199,7 @@ app.post('/api/auth/admin/login', (req, res) => {
 app.use('/api/students', authenticate, studentRoutes);
 app.use('/api/exams', authenticate, examRoutes);
 app.use('/api/allocations', authenticate, allocationRoutes);
+app.use('/api/faculty', facultyRoutes);
 
 // User details endpoints
 app.get('/api/students/:studentId', async (req, res) => {
@@ -411,4 +414,21 @@ app.get('/api/exams/:studentId', async (req, res) => {
         console.error('Error fetching exam schedule:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
+});
+
+// Serve static files
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/dashboard.html'));
+});
+
+app.get('/teacher-dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/teacher-dashboard.html'));
+});
+
+app.get('/admin-panel', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/admin-panel.html'));
 });

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Database Overview</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4169E1;
+            --primary-light: #f0f4ff;
+            --secondary: #FF6B6B;
+            --accent: #4ECDC4;
+            --background: #f5f7fa;
+            --text: #2D3436;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--card-bg);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            color: var(--primary);
+        }
+
+        .logout-btn {
+            padding: 0.5rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #3557c0;
+        }
+
+        .panel-section {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .section-title {
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .data-table th, .data-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table th {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--primary);
+        }
+
+        .error {
+            color: var(--secondary);
+            padding: 1rem;
+            background: #fff3f3;
+            border-radius: 5px;
+            margin-top: 1rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #e3fcef;
+            color: #00875a;
+        }
+
+        .badge-pending {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .refresh-btn {
+            padding: 0.5rem 1rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: #e1e8ff;
+        }
+
+        @media (max-width: 768px) {
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="header-title">Database Overview</h1>
+            <a href="#" class="logout-btn" onclick="logout()">Logout</a>
+        </header>
+
+        <!-- Students Section -->
+        <section class="panel-section" id="studentsSection">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="material-icons">school</span>
+                    Students
+                </h2>
+                <button class="refresh-btn" onclick="loadStudents()">
+                    <span class="material-icons">refresh</span>
+                    Refresh
+                </button>
+            </div>
+            <div id="studentsLoading" class="loading">Loading students...</div>
+            <div id="studentsError" class="error" style="display: none;"></div>
+            <table class="data-table" id="studentsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Department</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody"></tbody>
+            </table>
+        </section>
+
+        <!-- Faculty Section -->
+        <section class="panel-section" id="facultySection">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="material-icons">person</span>
+                    Faculty
+                </h2>
+                <button class="refresh-btn" onclick="loadFaculty()">
+                    <span class="material-icons">refresh</span>
+                    Refresh
+                </button>
+            </div>
+            <div id="facultyLoading" class="loading">Loading faculty...</div>
+            <div id="facultyError" class="error" style="display: none;"></div>
+            <table class="data-table" id="facultyTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="facultyTableBody"></tbody>
+            </table>
+        </section>
+
+        <!-- Exams Section -->
+        <section class="panel-section" id="examsSection">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="material-icons">event_note</span>
+                    Exams
+                </h2>
+                <button class="refresh-btn" onclick="loadExams()">
+                    <span class="material-icons">refresh</span>
+                    Refresh
+                </button>
+            </div>
+            <div id="examsLoading" class="loading">Loading exams...</div>
+            <div id="examsError" class="error" style="display: none;"></div>
+            <table class="data-table" id="examsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Semester</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="examsTableBody"></tbody>
+            </table>
+        </section>
+
+        <!-- Rooms Section -->
+        <section class="panel-section" id="roomsSection">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="material-icons">meeting_room</span>
+                    Rooms
+                </h2>
+                <button class="refresh-btn" onclick="loadRooms()">
+                    <span class="material-icons">refresh</span>
+                    Refresh
+                </button>
+            </div>
+            <div id="roomsLoading" class="loading">Loading rooms...</div>
+            <div id="roomsError" class="error" style="display: none;"></div>
+            <table class="data-table" id="roomsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Room Number</th>
+                        <th>Building</th>
+                        <th>Capacity</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="roomsTableBody"></tbody>
+            </table>
+        </section>
+
+        <!-- Allocations Section -->
+        <section class="panel-section" id="allocationsSection">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="material-icons">assignment_ind</span>
+                    Allocations
+                </h2>
+                <button class="refresh-btn" onclick="loadAllocations()">
+                    <span class="material-icons">refresh</span>
+                    Refresh
+                </button>
+            </div>
+            <div id="allocationsLoading" class="loading">Loading allocations...</div>
+            <div id="allocationsError" class="error" style="display: none;"></div>
+            <table class="data-table" id="allocationsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Exam</th>
+                        <th>Room</th>
+                        <th>Faculty</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="allocationsTableBody"></tbody>
+            </table>
+        </section>
+    </div>
+
+    <script>
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'login.html';
+                return;
+            }
+            loadAllData();
+        });
+
+        function loadAllData() {
+            loadStudents();
+            loadFaculty();
+            loadExams();
+            loadRooms();
+            loadAllocations();
+        }
+
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = '/index.html';
+        }
+
+        async function loadStudents() {
+            const studentsLoading = document.getElementById('studentsLoading');
+            const studentsError = document.getElementById('studentsError');
+            const studentsTable = document.getElementById('studentsTable');
+            const studentsTableBody = document.getElementById('studentsTableBody');
+
+            try {
+                studentsLoading.style.display = 'block';
+                studentsTable.style.display = 'none';
+                studentsError.style.display = 'none';
+
+                const response = await fetch('/api/admin/students');
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.message || 'Failed to load students');
+
+                studentsTableBody.innerHTML = data.map(student => `
+                    <tr>
+                        <td>${student.student_id}</td>
+                        <td>${student.name}</td>
+                        <td>${student.email}</td>
+                        <td>${student.phone}</td>
+                        <td>${student.department}</td>
+                    </tr>
+                `).join('');
+
+                studentsTable.style.display = 'table';
+            } catch (error) {
+                studentsError.textContent = error.message;
+                studentsError.style.display = 'block';
+            } finally {
+                studentsLoading.style.display = 'none';
+            }
+        }
+
+        async function loadFaculty() {
+            const facultyLoading = document.getElementById('facultyLoading');
+            const facultyError = document.getElementById('facultyError');
+            const facultyTable = document.getElementById('facultyTable');
+            const facultyTableBody = document.getElementById('facultyTableBody');
+
+            try {
+                facultyLoading.style.display = 'block';
+                facultyTable.style.display = 'none';
+                facultyError.style.display = 'none';
+
+                const response = await fetch('/api/admin/faculty');
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.message || 'Failed to load faculty');
+
+                facultyTableBody.innerHTML = data.map(faculty => `
+                    <tr>
+                        <td>${faculty.faculty_id}</td>
+                        <td>${faculty.name}</td>
+                        <td>${faculty.email}</td>
+                        <td>${faculty.department}</td>
+                        <td>
+                            <span class="badge ${faculty.is_available ? 'badge-success' : 'badge-pending'}">
+                                ${faculty.is_available ? 'Available' : 'Busy'}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+
+                facultyTable.style.display = 'table';
+            } catch (error) {
+                facultyError.textContent = error.message;
+                facultyError.style.display = 'block';
+            } finally {
+                facultyLoading.style.display = 'none';
+            }
+        }
+
+        async function loadExams() {
+            const examsLoading = document.getElementById('examsLoading');
+            const examsError = document.getElementById('examsError');
+            const examsTable = document.getElementById('examsTable');
+            const examsTableBody = document.getElementById('examsTableBody');
+
+            try {
+                examsLoading.style.display = 'block';
+                examsTable.style.display = 'none';
+                examsError.style.display = 'none';
+
+                const response = await fetch('/api/admin/exams');
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.message || 'Failed to load exams');
+
+                examsTableBody.innerHTML = data.map(exam => `
+                    <tr>
+                        <td>${exam.exam_id}</td>
+                        <td>${exam.subject}</td>
+                        <td>${new Date(exam.date).toLocaleDateString()}</td>
+                        <td>${exam.start_time} - ${exam.end_time}</td>
+                        <td>${exam.semester}</td>
+                        <td>
+                            <span class="badge ${exam.is_allocated ? 'badge-success' : 'badge-pending'}">
+                                ${exam.is_allocated ? 'Allocated' : 'Pending'}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+
+                examsTable.style.display = 'table';
+            } catch (error) {
+                examsError.textContent = error.message;
+                examsError.style.display = 'block';
+            } finally {
+                examsLoading.style.display = 'none';
+            }
+        }
+
+        async function loadRooms() {
+            const roomsLoading = document.getElementById('roomsLoading');
+            const roomsError = document.getElementById('roomsError');
+            const roomsTable = document.getElementById('roomsTable');
+            const roomsTableBody = document.getElementById('roomsTableBody');
+
+            try {
+                roomsLoading.style.display = 'block';
+                roomsTable.style.display = 'none';
+                roomsError.style.display = 'none';
+
+                const response = await fetch('/api/admin/rooms');
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.message || 'Failed to load rooms');
+
+                roomsTableBody.innerHTML = data.map(room => `
+                    <tr>
+                        <td>${room.room_id}</td>
+                        <td>${room.room_no}</td>
+                        <td>${room.building}</td>
+                        <td>${room.capacity}</td>
+                        <td>
+                            <span class="badge ${room.is_available ? 'badge-success' : 'badge-pending'}">
+                                ${room.is_available ? 'Available' : 'Occupied'}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+
+                roomsTable.style.display = 'table';
+            } catch (error) {
+                roomsError.textContent = error.message;
+                roomsError.style.display = 'block';
+            } finally {
+                roomsLoading.style.display = 'none';
+            }
+        }
+
+        async function loadAllocations() {
+            const allocationsLoading = document.getElementById('allocationsLoading');
+            const allocationsError = document.getElementById('allocationsError');
+            const allocationsTable = document.getElementById('allocationsTable');
+            const allocationsTableBody = document.getElementById('allocationsTableBody');
+
+            try {
+                allocationsLoading.style.display = 'block';
+                allocationsTable.style.display = 'none';
+                allocationsError.style.display = 'none';
+
+                const response = await fetch('/api/admin/allocations');
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.message || 'Failed to load allocations');
+
+                allocationsTableBody.innerHTML = data.map(allocation => `
+                    <tr>
+                        <td>${allocation.subject}</td>
+                        <td>${allocation.building} ${allocation.room_no}</td>
+                        <td>${allocation.faculty_name}</td>
+                        <td>${new Date(allocation.date).toLocaleDateString()}</td>
+                        <td>${allocation.start_time} - ${allocation.end_time}</td>
+                    </tr>
+                `).join('');
+
+                allocationsTable.style.display = 'table';
+            } catch (error) {
+                allocationsError.textContent = error.message;
+                allocationsError.style.display = 'block';
+            } finally {
+                allocationsLoading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html> 

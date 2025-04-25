@@ -15,7 +15,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: url('srm.jpg') no-repeat center center fixed;
+            background: url('images/srm.jpg') no-repeat center center fixed;
             background-size: cover;
             min-height: 100vh;
         }
@@ -94,6 +94,32 @@
             background-color: var(--primary-color);
             color: white;
             border: none;
+            padding: 12px;
+            font-weight: 500;
+        }
+
+        .table td {
+            padding: 12px;
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .btn-sm i {
+            font-size: 14px;
         }
 
         .action-btn {
@@ -102,6 +128,11 @@
             border: none;
             margin: 0 2px;
             cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
         }
 
         .edit-btn {
@@ -136,12 +167,139 @@
             text-align: center;
             padding: 40px;
             color: #666;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            margin: 20px 0;
         }
 
         .empty-state i {
             font-size: 48px;
             margin-bottom: 20px;
             color: var(--primary-color);
+        }
+
+        .recent-allocations {
+            margin-top: 2rem;
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .recent-allocations h2 {
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            font-size: 1.25rem;
+        }
+
+        .recent-allocations table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .recent-allocations th {
+            text-align: left;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            color: #6c757d;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .recent-allocations td {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            color: #2c3e50;
+        }
+
+        .recent-allocations tr:last-child td {
+            border-bottom: none;
+        }
+
+        .recent-allocations tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-badge.active {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-badge.pending {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+
+        #noAllocations {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #6c757d;
+            font-size: 1rem;
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        /* Responsive table */
+        @media (max-width: 768px) {
+            .recent-allocations {
+                padding: 1rem;
+            }
+
+            .recent-allocations th,
+            .recent-allocations td {
+                padding: 0.75rem;
+            }
+
+            .table-responsive {
+                max-height: 500px;
+                overflow-y: auto;
+            }
+        }
+
+        /* Add animation for table rows */
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        /* Status badge colors */
+        .badge.bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .badge.bg-warning {
+            background-color: #ffc107 !important;
+            color: #000;
+        }
+
+        .badge.bg-danger {
+            background-color: #dc3545 !important;
+        }
+
+        /* Add New button styling */
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -151,7 +309,7 @@
             <!-- Sidebar -->
             <div class="col-md-3 col-lg-2 sidebar">
                 <div class="text-center mb-4">
-                    <img src="logo.png" alt="SRM Logo" class="logo">
+                    <img src="images/logo.png" alt="SRM Logo" class="logo">
                     <h3>Admin Panel</h3>
                 </div>
                 <nav class="nav flex-column">
@@ -228,20 +386,22 @@
                     <div class="data-table mt-4">
                         <h4>Recent Allocations</h4>
                         <div class="table-responsive">
-                            <table class="table" id="recentAllocations">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Subject</th>
-                                        <th>Faculty</th>
-                                        <th>Room</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Filled dynamically -->
-                                </tbody>
-                            </table>
+                            <div class="recent-allocations-container">
+                                <table class="recent-allocations">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Subject</th>
+                                            <th>Faculty</th>
+                                            <th>Room</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentAllocationsTableBody">
+                                        <!-- Table rows will be dynamically added here -->
+                                    </tbody>
+                                </table>
+                            </div>
                             <div id="noAllocations" class="empty-state" style="display: none;">
                                 <i class="fas fa-inbox"></i>
                                 <p>No recent allocations found</p>
@@ -432,6 +592,254 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
+        // Load data for specific tabs
+        async function loadTabData(tabId) {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            try {
+                switch (tabId) {
+                    case 'dashboard':
+                        await loadDashboardData();
+                        break;
+                    case 'students':
+                        const studentsResponse = await fetch('/api/admin/students', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const studentsData = await studentsResponse.json();
+                        displayStudents(studentsData);
+                        break;
+                    case 'faculty':
+                        const facultyResponse = await fetch('/api/admin/faculty', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const facultyData = await facultyResponse.json();
+                        displayFaculty(facultyData);
+                        break;
+                    case 'exams':
+                        const examsResponse = await fetch('/api/admin/exams', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const examsData = await examsResponse.json();
+                        displayExams(examsData);
+                        break;
+                    case 'rooms':
+                        const roomsResponse = await fetch('/api/admin/rooms', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const roomsData = await roomsResponse.json();
+                        displayRooms(roomsData);
+                        break;
+                    case 'allocations':
+                        const allocationsResponse = await fetch('/api/admin/allocations', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const allocationsData = await allocationsResponse.json();
+                        displayAllocations(allocationsData);
+                        break;
+                }
+            } catch (error) {
+                console.error(`Error loading ${tabId} data:`, error);
+                alert(`Failed to load ${tabId} data. Please try again.`);
+            }
+        }
+
+        // Display functions for each section
+        function displayStudents(students) {
+            const tbody = document.querySelector('#studentsTable tbody');
+            tbody.innerHTML = '';
+
+            if (students.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center">No students found</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.student_id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.department}</td>
+                    <td>${student.email}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-2" onclick="editStudent('${student.student_id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteStudent('${student.student_id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayFaculty(faculty) {
+            const tbody = document.querySelector('#facultyTable tbody');
+            tbody.innerHTML = '';
+
+            if (faculty.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">No faculty found</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            faculty.forEach(member => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${member.faculty_id}</td>
+                    <td>${member.name}</td>
+                    <td>${member.department}</td>
+                    <td>${member.email}</td>
+                    <td>
+                        <span class="badge ${member.is_available ? 'bg-success' : 'bg-warning'}">
+                            ${member.is_available ? 'Available' : 'Busy'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-2" onclick="editFaculty('${member.faculty_id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteFaculty('${member.faculty_id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayExams(exams) {
+            const tbody = document.querySelector('#examsTable tbody');
+            tbody.innerHTML = '';
+
+            if (exams.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">No exams found</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            exams.forEach(exam => {
+                const row = document.createElement('tr');
+                const date = new Date(exam.date);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+                
+                row.innerHTML = `
+                    <td>${exam.subject}</td>
+                    <td>${formattedDate}</td>
+                    <td>${exam.start_time.slice(0, 5)} - ${exam.end_time.slice(0, 5)}</td>
+                    <td>${exam.room_no ? `${exam.building} ${exam.room_no}` : 'Not Assigned'}</td>
+                    <td>${exam.assigned_faculty || 'Not Assigned'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-2" onclick="editExam('${exam.exam_id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteExam('${exam.exam_id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayRooms(rooms) {
+            const tbody = document.querySelector('#roomsTable tbody');
+            tbody.innerHTML = '';
+
+            if (rooms.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center">No rooms found</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            rooms.forEach(room => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${room.room_no}</td>
+                    <td>${room.building}</td>
+                    <td>${room.capacity}</td>
+                    <td>
+                        <span class="badge ${room.is_available ? 'bg-success' : 'bg-warning'}">
+                            ${room.is_available ? 'Available' : 'Occupied'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-2" onclick="editRoom('${room.room_id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteRoom('${room.room_id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayAllocations(allocations) {
+            const tbody = document.querySelector('#allocationsTable tbody');
+            tbody.innerHTML = '';
+
+            if (allocations.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">No allocations found</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            allocations.forEach(allocation => {
+                const row = document.createElement('tr');
+                const date = new Date(allocation.date);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+
+                // Format room display without duplicating TP
+                const roomDisplay = allocation.room_no || 'Not Assigned';
+
+                row.innerHTML = `
+                    <td>${allocation.subject}</td>
+                    <td>${allocation.faculty_name || 'Not Assigned'}</td>
+                    <td>${roomDisplay}</td>
+                    <td>${formattedDate}</td>
+                    <td>${allocation.start_time.slice(0, 5)} - ${allocation.end_time.slice(0, 5)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="deleteAllocation('${allocation.exam_id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
         // Load dashboard data with token
         async function loadDashboardData() {
             try {
@@ -460,31 +868,53 @@
                 document.getElementById('roomCount').textContent = data.statistics.available_rooms || 0;
 
                 // Update recent allocations
-                const allocationsTable = document.getElementById('recentAllocations').getElementsByTagName('tbody')[0];
+                const allocationsTable = document.getElementById('recentAllocationsTableBody');
                 const noAllocations = document.getElementById('noAllocations');
                 
                 allocationsTable.innerHTML = '';
                 
                 if (data.recentAllocations && data.recentAllocations.length > 0) {
                     data.recentAllocations.forEach(allocation => {
-                        const row = allocationsTable.insertRow();
+                        const row = document.createElement('tr');
+                        
+                        // Format date
+                        const date = new Date(allocation.date);
+                        const formattedDate = date.toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                        });
+
+                        // Format room display
+                        const roomDisplay = allocation.room_no ? 
+                            `${allocation.building} ${allocation.room_no}` : 
+                            'Not Assigned';
+
+                        // Format faculty display
+                        const facultyDisplay = allocation.faculty_name || 'Not Assigned';
+                        
                         row.innerHTML = `
-                            <td>${new Date(allocation.date).toLocaleDateString()}</td>
+                            <td>${formattedDate}</td>
                             <td>${allocation.subject}</td>
-                            <td>${allocation.faculty_name || 'Not Assigned'}</td>
-                            <td>${allocation.room_number || 'Not Assigned'}</td>
-                            <td><span class="badge bg-success">Active</span></td>
+                            <td>${facultyDisplay}</td>
+                            <td>${roomDisplay}</td>
+                            <td>
+                                <span class="status-badge ${allocation.status.toLowerCase()}">${allocation.status}</span>
+                            </td>
                         `;
+                        
+                        allocationsTable.appendChild(row);
                     });
-                    allocationsTable.style.display = 'table';
+                    
                     noAllocations.style.display = 'none';
+                    allocationsTable.parentElement.style.display = 'table';
                 } else {
-                    allocationsTable.style.display = 'none';
-                    noAllocations.style.display = 'block';
+                    noAllocations.style.display = 'flex';
+                    allocationsTable.parentElement.style.display = 'none';
                 }
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
-                // Show error message to user
                 alert('Failed to load dashboard data. Please try again.');
             }
         }

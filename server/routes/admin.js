@@ -14,20 +14,33 @@ router.get('/dashboard', async (req, res) => {
     try {
         const stats = await pool.query(`
             SELECT 
-                (SELECT COUNT(*) FROM student) as total_students,
-                (SELECT COUNT(*) FROM faculty) as total_faculty,
-                (SELECT COUNT(*) FROM exam) as total_exams,
-                (SELECT COUNT(*) FROM room) as available_rooms
+                (SELECT COUNT(*) FROM Student) as total_students,
+                (SELECT COUNT(*) FROM Faculty) as total_faculty,
+                (SELECT COUNT(*) FROM Exam WHERE date >= CURRENT_DATE) as total_exams,
+                (SELECT COUNT(*) FROM Room) as available_rooms
         `);
 
         const recentAllocations = await pool.query(`
-            SELECT a.id, e.subject, f.name as faculty_name, r.room_no, e.date, e.time
-            FROM allocation a
-            JOIN exam e ON a.exam_id = e.exam_id
-            JOIN faculty f ON a.faculty_id = f.faculty_id
-            JOIN room r ON a.room_id = r.room_id
-            ORDER BY e.date DESC, e.time DESC
-            LIMIT 5
+            SELECT 
+                e.exam_id,
+                e.date,
+                e.subject,
+                e.start_time,
+                e.end_time,
+                f.name as faculty_name,
+                r.room_no,
+                r.building,
+                CASE 
+                    WHEN f.faculty_id IS NOT NULL AND r.room_id IS NOT NULL THEN 'Active'
+                    ELSE 'Pending'
+                END as status
+            FROM Exam e
+            LEFT JOIN Allocation a ON e.exam_id = a.exam_id
+            LEFT JOIN Faculty f ON a.faculty_id = f.faculty_id
+            LEFT JOIN Room r ON a.room_id = r.room_id
+            WHERE e.date >= CURRENT_DATE
+            ORDER BY e.date ASC, e.start_time ASC
+            LIMIT 10
         `);
 
         res.json({
@@ -43,10 +56,20 @@ router.get('/dashboard', async (req, res) => {
 // Get all students
 router.get('/students', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM student ORDER BY name');
-        res.json(result.rows);
-    } catch (error) {
-        console.error('Error fetching students:', error);
+        const query = `
+            SELECT 
+                student_id,
+                CONCAT(first_name, ' ', last_name) as name,
+                email,
+                phone_number as phone,
+                department
+            FROM Student
+            ORDER BY student_id;
+        `;
+        const { rows } = await pool.query(query);
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching students:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -54,10 +77,26 @@ router.get('/students', async (req, res) => {
 // Get all faculty
 router.get('/faculty', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM faculty ORDER BY name');
-        res.json(result.rows);
-    } catch (error) {
-        console.error('Error fetching faculty:', error);
+        const query = `
+            SELECT 
+                f.faculty_id,
+                f.name,
+                f.email,
+                f.department,
+                NOT EXISTS (
+                    SELECT 1 FROM Allocation a 
+                    JOIN Exam e ON a.exam_id = e.exam_id
+                    WHERE a.faculty_id = f.faculty_id 
+                    AND e.date = CURRENT_DATE 
+                    AND CURRENT_TIME BETWEEN e.start_time AND e.end_time
+                ) as is_available
+            FROM Faculty f
+            ORDER BY f.name;
+        `;
+        const { rows } = await pool.query(query);
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching faculty:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -65,17 +104,25 @@ router.get('/faculty', async (req, res) => {
 // Get all exams
 router.get('/exams', async (req, res) => {
     try {
-        const result = await pool.query(`
-            SELECT e.*, r.room_number, f.name as faculty_name
-            FROM exam e
-            LEFT JOIN allocation a ON e.id = a.exam_id
-            LEFT JOIN room r ON a.room_id = r.id
-            LEFT JOIN faculty f ON a.faculty_id = f.id
-            ORDER BY e.date, e.time
-        `);
-        res.json(result.rows);
-    } catch (error) {
-        console.error('Error fetching exams:', error);
+        const query = `
+            SELECT 
+                e.exam_id,
+                e.subject,
+                e.date,
+                e.start_time,
+                e.end_time,
+                e.semester,
+                EXISTS (
+                    SELECT 1 FROM Allocation a 
+                    WHERE a.exam_id = e.exam_id
+                ) as is_allocated
+            FROM Exam e
+            ORDER BY e.date, e.start_time;
+        `;
+        const { rows } = await pool.query(query);
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching exams:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -83,10 +130,52 @@ router.get('/exams', async (req, res) => {
 // Get all rooms
 router.get('/rooms', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM room ORDER BY room_number');
-        res.json(result.rows);
-    } catch (error) {
-        console.error('Error fetching rooms:', error);
+        const query = `
+            SELECT 
+                r.room_id,
+                r.room_no,
+                r.building,
+                r.capacity,
+                NOT EXISTS (
+                    SELECT 1 FROM Allocation a 
+                    JOIN Exam e ON a.exam_id = e.exam_id
+                    WHERE a.room_id = r.room_id 
+                    AND e.date = CURRENT_DATE 
+                    AND CURRENT_TIME BETWEEN e.start_time AND e.end_time
+                ) as is_available
+            FROM Room r
+            ORDER BY r.building, r.room_no;
+        `;
+        const { rows } = await pool.query(query);
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching rooms:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Get all allocations
+router.get('/allocations', async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                e.subject,
+                r.building,
+                r.room_no,
+                f.name as faculty_name,
+                e.date,
+                e.start_time,
+                e.end_time
+            FROM Allocation a
+            JOIN Exam e ON a.exam_id = e.exam_id
+            JOIN Room r ON a.room_id = r.room_id
+            JOIN Faculty f ON a.faculty_id = f.faculty_id
+            ORDER BY e.date, e.start_time;
+        `;
+        const { rows } = await pool.query(query);
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching allocations:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

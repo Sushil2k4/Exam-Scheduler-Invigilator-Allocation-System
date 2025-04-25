@@ -27,14 +27,17 @@ router.get('/:studentId/exams', async (req, res) => {
                 e.semester,
                 r.building,
                 r.room_no,
-                COALESCE(r.building || ' Room ' || r.room_no, 'Not assigned') AS location,
-                f.name AS invigilator,
+                CASE 
+                    WHEN r.room_no IS NOT NULL THEN r.building || ' ' || r.room_no
+                    ELSE 'Not assigned'
+                END AS location,
+                COALESCE(f.name, 'Not assigned') AS invigilator,
                 s.department
             FROM Student s
             JOIN TimeTable tt ON s.student_id = tt.student_id
             JOIN Exam e ON tt.exam_id = e.exam_id
-            LEFT JOIN Room r ON tt.room_id = r.room_id
             LEFT JOIN Allocation a ON e.exam_id = a.exam_id
+            LEFT JOIN Room r ON a.room_id = r.room_id
             LEFT JOIN Faculty f ON a.faculty_id = f.faculty_id
             WHERE s.student_id = $1
             ORDER BY e.date ASC, e.start_time ASC;
@@ -59,7 +62,7 @@ router.get('/:studentId/exams', async (req, res) => {
                 formatted_date: exam.formatted_date,
                 time_slot: exam.time_slot,
                 location: exam.location,
-                invigilator: exam.invigilator || 'Not assigned',
+                invigilator: exam.invigilator,
                 semester: exam.semester
             }))
         };
