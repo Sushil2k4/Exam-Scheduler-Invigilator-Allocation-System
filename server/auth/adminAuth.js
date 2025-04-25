@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const pool = require('../db');
 
 // Admin credentials (in production, store hashed password in environment variables)
 const ADMIN_CREDENTIALS = {
@@ -6,30 +7,63 @@ const ADMIN_CREDENTIALS = {
   password: 'ESIAS@2023' // Change this in production!
 };
 
-const login = (adminId, password) => {
+const ADMIN_PASSWORD = 'admin@123';
+
+const login = (req, res) => {
+  const { username, password } = req.body;
+
   try {
-    if (adminId !== ADMIN_CREDENTIALS.id || password !== ADMIN_CREDENTIALS.password) {
-      throw new Error('Invalid admin credentials');
+    // Check if username is 'admin' and password matches
+    if (username === 'admin' && password === ADMIN_PASSWORD) {
+      // Generate JWT token
+      const token = jwt.sign(
+        { username: 'admin', role: 'admin' },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '24h' }
+      );
+
+      res.json({ 
+        token,
+        user: {
+          username: 'admin',
+          role: 'admin'
+        },
+        redirectUrl: '/admin-dashboard.html'
+      });
+    } else {
+      res.status(401).json({ error: 'Invalid credentials' });
     }
-
-    const token = jwt.sign(
-      { id: adminId, role: 'admin' },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    return {
-      token,
-      user: {
-        id: adminId,
-        name: 'System Administrator',
-        role: 'admin'
-      }
-    };
-  } catch (err) {
-    console.error('Admin login error:', err);
-    throw err;
+  } catch (error) {
+    console.error('Error during admin login:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
-module.exports = { login };
+function authenticateAdmin(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    req.user = decoded;
+    next();
+  } catch (error) {
+    console.error('Error authenticating admin:', error);
+    res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
+module.exports = {
+  login,
+  authenticateAdmin
+};

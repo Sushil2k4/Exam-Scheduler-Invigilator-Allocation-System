@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SRM Exam Scheduler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #f5f6fa;
+            --accent-color: #283593;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('srm.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: -1;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            min-height: 100vh;
+            color: white;
+            padding-top: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.9);
+            padding: 12px 20px;
+            margin: 4px 0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .welcome-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .data-table {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: none;
+            margin: 0 2px;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        #datetime {
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .logo {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <div class="text-center mb-4">
+                    <img src="logo.png" alt="SRM Logo" class="logo">
+                    <h3>Admin Panel</h3>
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="#dashboard" onclick="showTab('dashboard')">
+                        <i class="fas fa-home me-2"></i> Dashboard
+                    </a>
+                    <a class="nav-link" href="#students" onclick="showTab('students')">
+                        <i class="fas fa-user-graduate me-2"></i> Students
+                    </a>
+                    <a class="nav-link" href="#faculty" onclick="showTab('faculty')">
+                        <i class="fas fa-chalkboard-teacher me-2"></i> Faculty
+                    </a>
+                    <a class="nav-link" href="#exams" onclick="showTab('exams')">
+                        <i class="fas fa-file-alt me-2"></i> Exams
+                    </a>
+                    <a class="nav-link" href="#rooms" onclick="showTab('rooms')">
+                        <i class="fas fa-door-open me-2"></i> Rooms
+                    </a>
+                    <a class="nav-link" href="#allocations" onclick="showTab('allocations')">
+                        <i class="fas fa-tasks me-2"></i> Allocations
+                    </a>
+                    <a class="nav-link text-danger" href="#" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Welcome Section -->
+                <div class="welcome-section">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h2>Welcome, Admin!</h2>
+                            <p id="datetime" class="mb-0"></p>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-primary" onclick="refreshData()">
+                                <i class="fas fa-sync-alt me-2"></i> Refresh Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Tab -->
+                <div id="dashboard" class="tab-content active">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h3 class="text-primary"><i class="fas fa-user-graduate me-2"></i><span id="studentCount">-</span></h3>
+                                <p class="mb-0">Total Students</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h3 class="text-success"><i class="fas fa-chalkboard-teacher me-2"></i><span id="facultyCount">-</span></h3>
+                                <p class="mb-0">Total Faculty</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h3 class="text-info"><i class="fas fa-file-alt me-2"></i><span id="examCount">-</span></h3>
+                                <p class="mb-0">Active Exams</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h3 class="text-warning"><i class="fas fa-door-open me-2"></i><span id="roomCount">-</span></h3>
+                                <p class="mb-0">Available Rooms</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-table mt-4">
+                        <h4>Recent Allocations</h4>
+                        <div class="table-responsive">
+                            <table class="table" id="recentAllocations">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Subject</th>
+                                        <th>Faculty</th>
+                                        <th>Room</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled dynamically -->
+                                </tbody>
+                            </table>
+                            <div id="noAllocations" class="empty-state" style="display: none;">
+                                <i class="fas fa-inbox"></i>
+                                <p>No recent allocations found</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Students Tab -->
+                <div id="students" class="tab-content">
+                    <div class="data-table">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>Students List</h4>
+                            <button class="btn btn-primary" onclick="addNewStudent()">
+                                <i class="fas fa-plus me-2"></i> Add New Student
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table" id="studentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Email</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Faculty Tab -->
+                <div id="faculty" class="tab-content">
+                    <div class="data-table">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>Faculty List</h4>
+                            <button class="btn btn-primary" onclick="addNewFaculty()">
+                                <i class="fas fa-plus me-2"></i> Add New Faculty
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table" id="facultyTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exams Tab -->
+                <div id="exams" class="tab-content">
+                    <div class="data-table">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>Exams Schedule</h4>
+                            <button class="btn btn-primary" onclick="addNewExam()">
+                                <i class="fas fa-plus me-2"></i> Add New Exam
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table" id="examsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Room</th>
+                                        <th>Faculty</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rooms Tab -->
+                <div id="rooms" class="tab-content">
+                    <div class="data-table">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>Rooms List</h4>
+                            <button class="btn btn-primary" onclick="addNewRoom()">
+                                <i class="fas fa-plus me-2"></i> Add New Room
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table" id="roomsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Room No</th>
+                                        <th>Building</th>
+                                        <th>Capacity</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Allocations Tab -->
+                <div id="allocations" class="tab-content">
+                    <div class="data-table">
+                        <h4>Exam Allocations</h4>
+                        <div class="table-responsive">
+                            <table class="table" id="allocationsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Exam</th>
+                                        <th>Faculty</th>
+                                        <th>Room</th>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="settings" class="tab-content">
+                    <div class="data-table">
+                        <h4>System Settings</h4>
+                        <form id="settingsForm">
+                            <div class="mb-3">
+                                <label class="form-label">System Email</label>
+                                <input type="email" class="form-control" id="systemEmail">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Notification Settings</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="emailNotifications">
+                                    <label class="form-check-label">Enable Email Notifications</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Update datetime
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('datetime').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // Load dashboard data with token
+        async function loadDashboardData() {
+            try {
+                const token = localStorage.getItem('adminToken');
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                const response = await fetch('/api/admin/dashboard', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch dashboard data');
+                }
+
+                const data = await response.json();
+                
+                // Update statistics
+                document.getElementById('studentCount').textContent = data.statistics.total_students || 0;
+                document.getElementById('facultyCount').textContent = data.statistics.total_faculty || 0;
+                document.getElementById('examCount').textContent = data.statistics.total_exams || 0;
+                document.getElementById('roomCount').textContent = data.statistics.available_rooms || 0;
+
+                // Update recent allocations
+                const allocationsTable = document.getElementById('recentAllocations').getElementsByTagName('tbody')[0];
+                const noAllocations = document.getElementById('noAllocations');
+                
+                allocationsTable.innerHTML = '';
+                
+                if (data.recentAllocations && data.recentAllocations.length > 0) {
+                    data.recentAllocations.forEach(allocation => {
+                        const row = allocationsTable.insertRow();
+                        row.innerHTML = `
+                            <td>${new Date(allocation.date).toLocaleDateString()}</td>
+                            <td>${allocation.subject}</td>
+                            <td>${allocation.faculty_name || 'Not Assigned'}</td>
+                            <td>${allocation.room_number || 'Not Assigned'}</td>
+                            <td><span class="badge bg-success">Active</span></td>
+                        `;
+                    });
+                    allocationsTable.style.display = 'table';
+                    noAllocations.style.display = 'none';
+                } else {
+                    allocationsTable.style.display = 'none';
+                    noAllocations.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                // Show error message to user
+                alert('Failed to load dashboard data. Please try again.');
+            }
+        }
+
+        // Tab switching
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[href="#${tabId}"]`).classList.add('active');
+
+            loadTabData(tabId);
+        }
+
+        // Refresh data
+        function refreshData() {
+            const activeTab = document.querySelector('.tab-content.active').id;
+            loadTabData(activeTab);
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/login.html';
+        }
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            loadDashboardData();
+        });
+    </script>
+</body>
+</html> 

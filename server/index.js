@@ -11,6 +11,7 @@ const examRoutes = require('./routes/exams');
 const allocationRoutes = require('./routes/allocations');
 const { login: studentLogin } = require('./auth/studentAuth');
 const { login: teacherLogin } = require('./auth/teacherAuth');
+const adminRoutes = require('./routes/admin');
 
 // Initialize Express app
 const app = express();
@@ -301,6 +302,9 @@ app.get('/api/statistics/pending-allocations', async (req, res) => {
     }
 });
 
+// Add admin routes
+app.use('/api/admin', adminRoutes);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('[ERROR]', err.stack);
@@ -312,27 +316,32 @@ app.use((err, req, res, next) => {
 
 // Start server with port conflict handling
 const startServer = (port) => {
-  const server = app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-    console.log('Available endpoints:');
-    console.log(`- POST http://localhost:${port}/api/auth/student/login`);
-    console.log(`- POST http://localhost:${port}/api/auth/teacher/login`);
-    console.log(`- POST http://localhost:${port}/api/auth/admin/login`);
-    console.log(`- GET  http://localhost:${port}/api/students`);
-    console.log(`- GET  http://localhost:${port}/api/exams`);
-    console.log(`- GET  http://localhost:${port}/api/allocations`);
-    console.log(`- GET  http://localhost:${port}/api/health`);
-  });
+  try {
+    const server = app.listen(port, () => {
+      console.log(`Server running on http://localhost:${port}`);
+      console.log('Available endpoints:');
+      console.log(`- POST http://localhost:${port}/api/auth/student/login`);
+      console.log(`- POST http://localhost:${port}/api/auth/teacher/login`);
+      console.log(`- POST http://localhost:${port}/api/auth/admin/login`);
+      console.log(`- GET  http://localhost:${port}/api/students`);
+      console.log(`- GET  http://localhost:${port}/api/exams`);
+      console.log(`- GET  http://localhost:${port}/api/allocations`);
+      console.log(`- GET  http://localhost:${port}/api/health`);
+    });
 
-  server.on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-      console.warn(`Port ${port} is already in use, trying port ${port + 1}...`);
-      startServer(port + 1);
-    } else {
-      console.error('Server error:', err);
-      process.exit(1);
-    }
-  });
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.warn(`Port ${port} is already in use, trying port ${port + 1}`);
+        startServer(port + 1);
+      } else {
+        console.error('Server error:', err);
+        process.exit(1);
+      }
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
 };
 
 // Start the server
